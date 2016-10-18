@@ -14,7 +14,7 @@ import org.jenkinsci.plugins.puppetenterprise.models.HieraConfig;
 
 @Extension
 public class HieraDataStore implements RootAction {
-  private static final String ICON_PATH = "/plugin/workflow-puppet-enterprise/images/cfg_logo.png";
+  private static final String ICON_PATH = "/plugin/puppet-enterprise-pipeline/images/cfg_logo.png";
 
   private HieraConfig hiera = null;
 

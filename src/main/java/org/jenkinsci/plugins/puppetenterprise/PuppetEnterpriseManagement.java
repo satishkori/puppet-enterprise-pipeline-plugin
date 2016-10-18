@@ -36,7 +36,7 @@ import org.jenkinsci.plugins.puppetenterprise.models.PuppetEnterpriseConfig;
 
 @Extension
 public class PuppetEnterpriseManagement extends ManagementLink {
-  private static final String ICON_PATH = "/plugin/workflow-puppet-enterprise/images/cfg_logo.png";
+  private static final String ICON_PATH = "/plugin/puppet-enterprise-pipeline/images/cfg_logo.png";
 
   private PuppetEnterpriseConfig config;
 

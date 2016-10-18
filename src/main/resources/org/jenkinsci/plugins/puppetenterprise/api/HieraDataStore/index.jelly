@@ -3,13 +3,13 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
 <j:new var="h" className="hudson.Functions" />
 
-  <l:layout norefresh="true" css="/plugin/workflow-puppet-enterprise/css/hiera.css">
+  <l:layout norefresh="true" css="/plugin/puppet-enterprise-pipeline/css/hiera.css">
     <st:bind value="${it.deleteScope}" var="backend"/>
     <l:header>
     </l:header>
     <st:include page="sidepanel.jelly" />
     <l:main-panel>
-      <script type="text/javascript" src="${rootURL}/plugin/workflow-puppet-enterprise/js/run_prettify.js?lang=yaml&amp;lan=groovy&amp;skin=sunburst"></script>
+      <script type="text/javascript" src="${rootURL}/plugin/puppet-enterprise-pipeline/js/run_prettify.js?lang=yaml&amp;lan=groovy&amp;skin=sunburst"></script>
       <script>
         function confirmDeleteScope(scope) {
           var scopeDiv = document.getElementById(scope);
