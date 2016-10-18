@@ -12,7 +12,7 @@
     <version>1.0.0</version>
     <packaging>hpi</packaging>
     <name>Pipeline: Puppet Enterprise</name>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Puppet+Enterprise+Plugin</url>
+    <url>https://wiki.jenkins-ci.org/display/JENKINS/Puppet+Enterprise+Pipeline+Plugin</url>
     <licenses>
         <license>
             <name>MIT License</name>
@@ -20,9 +20,9 @@
         </license>
     </licenses>
     <scm>
-      <connection>scm:git:git://github.com/jenkinsci/${artifactId}.git</connection>
-      <developerConnection>scm:git:git://github.com/jenkinsci/${artifactId}.git</developerConnection>
-      <url>https://github.com/jenkinsci/${artifactId}</url>
+      <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
+      <developerConnection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</developerConnection>
+      <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
       <tag>HEAD</tag>
     </scm>
     <repositories>
