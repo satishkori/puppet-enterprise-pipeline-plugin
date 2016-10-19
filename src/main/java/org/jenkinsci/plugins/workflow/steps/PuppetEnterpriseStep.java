@@ -178,7 +178,7 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
     try {
       HttpResponse response = null;
 
-      if (method == "POST") {
+      if (method.equals("POST")) {
         HttpPost request = new HttpPost("https://" + config.getPuppetMasterUrl() + ":" + port + endpoint);
 
         if (body != null) {
@@ -190,7 +190,7 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
         response = httpClient.execute(request);
       }
 
-      if (method == "GET") {
+      if (method.equals("GET")) {
         HttpGet request = new HttpGet("https://" + config.getPuppetMasterUrl() + ":" + port + endpoint);
         request.addHeader("X-Authentication", accessToken);
         response = httpClient.execute(request);
