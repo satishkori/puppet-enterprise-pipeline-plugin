@@ -127,7 +127,6 @@ public class HieraConfig implements Serializable, Saveable {
     getConfigFile().write(HieraConfig.hierarchy);
   }
 
-  @Nonnull
   public XmlFile getConfigFile() {
     File rootDir = Jenkins.getInstance().getRootDir();
     File hiera_store = new File(Objects.requireNonNull(rootDir), "puppet_enterprise_hiera_store.xml");

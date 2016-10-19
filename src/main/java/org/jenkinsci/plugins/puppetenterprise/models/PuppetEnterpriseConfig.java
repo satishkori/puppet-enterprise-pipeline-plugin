@@ -127,7 +127,6 @@ public class PuppetEnterpriseConfig implements Serializable, Saveable {
     getConfigFile().write(this);
   }
 
-  @Nonnull
   public XmlFile getConfigFile() {
     File pe_config_file = new File(Jenkins.getInstance().getRootDir(), "puppet_enterprise.xml");
     XmlFile pe_config_xml = new XmlFile(pe_config_file);
