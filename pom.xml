@@ -64,9 +64,6 @@
           <xmlOutput>true</xmlOutput>
           <skip>${skipFindBugs}</skip>
           <xmlOutputDirectory>target/reports/findbugs</xmlOutputDirectory>
-          <excludeFilterFile>
-              src/main/resources/findbugs-exclude-filters.xml
-          </excludeFilterFile>
        </configuration>
       </plugin>
      </plugins>
