@@ -97,7 +97,7 @@ public class PuppetEnterpriseConfig implements Serializable, Saveable {
 
           Process p = Runtime.getRuntime().exec(cmd);
           p.waitFor();
-          InputStreamReader is = new InputStreamReader(p.getInputStream());
+          InputStreamReader is = new InputStreamReader(p.getInputStream(), "UTF-8");
           BufferedReader br = new BufferedReader(is);
 
           String lines = "";
@@ -127,7 +127,10 @@ public class PuppetEnterpriseConfig implements Serializable, Saveable {
     getConfigFile().write(this);
   }
 
-  public static XmlFile getConfigFile() {
-    return new XmlFile(new File(Jenkins.getInstance().getRootDir(), "puppet_enterprise.xml"));
+  public XmlFile getConfigFile() {
+    File pe_config_file = new File(Jenkins.getInstance().getRootDir(), "puppet_enterprise.xml");
+    XmlFile pe_config_xml = new XmlFile(pe_config_file);
+
+    return pe_config_xml;
   }
 }

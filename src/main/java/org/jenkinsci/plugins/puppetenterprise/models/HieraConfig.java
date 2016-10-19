@@ -127,7 +127,10 @@ public class HieraConfig implements Serializable, Saveable {
     getConfigFile().write(HieraConfig.hierarchy);
   }
 
-  public static XmlFile getConfigFile() {
-    return new XmlFile(new File(Jenkins.getInstance().getRootDir(), "puppet_enterprise_hiera_store.xml"));
+  public XmlFile getConfigFile() {
+    File hiera_store = new File(Jenkins.getInstance().getRootDir(), "puppet_enterprise_hiera_store.xml");
+    XmlFile hiera_store_xml = new XmlFile(hiera_store);
+
+    return hiera_store_xml;
   }
 }
