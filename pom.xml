@@ -11,7 +11,7 @@
     <artifactId>puppet-enterprise-pipeline</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>hpi</packaging>
-    <name>Pipeline: Puppet Enterprise</name>
+    <name>Puppet Enterprise Pipeline</name>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Puppet+Enterprise+Pipeline+Plugin</url>
     <licenses>
         <license>
