@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.puppetenterprise.models;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import hudson.security.ACL;
 import hudson.XmlFile;
 import hudson.model.Saveable;
@@ -127,10 +129,19 @@ public final class HieraConfig implements Serializable {
     getConfigFile().write(HieraConfig.hierarchy);
   }
 
+  @SuppressFBWarnings(
+    value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE",
+    justification = "The values are asserted to not be null, but findbugs doesn't know that."
+  )
   public static XmlFile getConfigFile() {
     File rootDir = Jenkins.getInstance().getRootDir();
-    File hiera_store = new File(Objects.requireNonNull(rootDir), "puppet_enterprise_hiera_store.xml");
-    XmlFile hiera_store_xml = new XmlFile(Objects.requireNonNull(hiera_store));
+    assert rootDir != null;
+
+    File hiera_store = new File(rootDir, "puppet_enterprise_hiera_store.xml");
+    assert hiera_store != null;
+
+    XmlFile hiera_store_xml = new XmlFile(hiera_store);
+    assert hiera_store_xml != null;
 
     return hiera_store_xml;
   }

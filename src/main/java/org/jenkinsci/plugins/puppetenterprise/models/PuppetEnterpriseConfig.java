@@ -164,9 +164,16 @@ public class PuppetEnterpriseConfig implements Serializable, Saveable {
     getConfigFile().write(this);
   }
 
+  @SuppressFBWarnings(
+    value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE",
+    justification = "The values are asserted to not be null, but findbugs doesn't know that."
+  )
   public XmlFile getConfigFile() {
     File pe_config_file = new File(Jenkins.getInstance().getRootDir(), "puppet_enterprise.xml");
+    assert pe_config_file != null;
+
     XmlFile pe_config_xml = new XmlFile(pe_config_file);
+    assert pe_config_xml != null;
 
     return pe_config_xml;
   }
