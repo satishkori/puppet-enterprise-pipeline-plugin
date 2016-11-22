@@ -86,6 +86,10 @@ public class PuppetEnterpriseConfig implements Serializable, Saveable {
   }
 
   public String getPuppetMasterUrl() {
+    InputStreamReader is = null;
+    BufferedReader br = null;
+    Process puppetCmd = null;
+
     if (!this.puppetMasterUrl.equals("")) {
       return this.puppetMasterUrl;
     } else {
@@ -95,17 +99,25 @@ public class PuppetEnterpriseConfig implements Serializable, Saveable {
         if (puppetFileHandler.exists()) {
           String cmd = "/opt/puppetlabs/bin/puppet config print server --config /etc/puppetlabs/puppet/puppet.conf";
 
-          Process p = Runtime.getRuntime().exec(cmd);
-          p.waitFor();
-          InputStreamReader is = new InputStreamReader(p.getInputStream(), "UTF-8");
-          BufferedReader br = new BufferedReader(is);
+          puppetCmd = Runtime.getRuntime().exec(cmd);
+          puppetCmd.waitFor();
+          is = new InputStreamReader(puppetCmd.getInputStream(), "UTF-8");
+          br = new BufferedReader(is);
 
-          String lines = "";
           String line = "";
 
-          while ((line = br.readLine()) != null) { lines = lines + line; }
+          StringBuffer buf = new StringBuffer();
+          String line = br.readLine();
+          while (line != null) {
+            buf.append(line);
+            line = br.readLine();
+          }
 
-          this.puppetMasterUrl = lines;
+          is.close();
+          br.close();
+          puppetCmd.destroy();
+
+          this.puppetMasterUrl = buf.toString();
         } else {
           this.puppetMasterUrl = "https://puppet";
         }
@@ -117,7 +129,28 @@ public class PuppetEnterpriseConfig implements Serializable, Saveable {
       } catch(java.security.NoSuchAlgorithmException e) {
       } catch(java.security.KeyStoreException e) {
       } catch(java.security.KeyManagementException e) {
-      } catch(InterruptedException e) {}
+      } catch(InterruptedException e) {
+      } finally {
+        if (is != null) {
+          try {
+            is.close();
+          } catch(IOException e) {
+            e.printStackTrace();
+          }
+        }
+
+        if (br != null) {
+          try {
+            br.close();
+          } catch(IOException e) {
+            e.printStackTrace();
+          }
+        }
+
+        if (puppetCmd != null) {
+          puppetCmd.destroy();
+        }
+      }
     }
 
     return this.puppetMasterUrl;
