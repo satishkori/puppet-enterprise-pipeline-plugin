@@ -16,40 +16,38 @@ import org.jenkinsci.plugins.puppetenterprise.models.HieraConfig;
 public class HieraDataStore implements RootAction {
   private static final String ICON_PATH = "/plugin/puppet-enterprise-pipeline/images/cfg_logo.png";
 
-  private HieraConfig hiera = null;
-
   public HieraDataStore() {
-    hiera = new HieraConfig();
+    HieraConfig.loadGlobalConfig();
   }
 
   public String[] getScopes() {
-    Set<String> scopeSet = hiera.getScopes();
+    Set<String> scopeSet = HieraConfig.getScopes();
     return scopeSet.toArray(new String[scopeSet.size()]);
   }
 
   public String[] getKeys(String scope) {
-    Set<String> keySet = hiera.getKeys(scope);
+    Set<String> keySet = HieraConfig.getKeys(scope);
     return keySet.toArray(new String[keySet.size()]);
   }
 
   public String getKeyValue(String scope, String key) {
-    Object value = hiera.getKeyValue(scope, key);
+    Object value = HieraConfig.getKeyValue(scope, key);
     return value.toString();
   }
 
   public String getKeySource(String scope, String key) {
-    String source = hiera.getKeySource(scope, key);
+    String source = HieraConfig.getKeySource(scope, key);
     return source;
   }
 
   @JavaScriptMethod
   public void deleteScope(String scope) {
-    hiera.deleteScope(scope);
+    HieraConfig.deleteScope(scope);
   }
 
   @JavaScriptMethod
   public void deleteKey(String key, String scope) {
-    hiera.deleteKey(key, scope);
+    HieraConfig.deleteKey(key, scope);
   }
 
   @Override
@@ -79,7 +77,7 @@ public class HieraDataStore implements RootAction {
     String keyArr[] = (String[]) parameters.get("key");
     String key = keyArr[0];
 
-    Object value = hiera.getKeyValue(scope, key);
+    Object value = HieraConfig.getKeyValue(scope, key);
 
     if (value == null) {
       rsp.setStatus(404);
