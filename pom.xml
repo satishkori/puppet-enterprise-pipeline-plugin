@@ -56,10 +56,10 @@
       <plugin>
        <groupId>org.codehaus.mojo</groupId>
        <artifactId>findbugs-maven-plugin</artifactId>
-       <version>2.5.2</version>
+       <version>3.0.1</version>
        <configuration>
-          <failOnError>false</failOnError>
-          <threshold>High</threshold>
+          <failOnError>true</failOnError>
+          <threshold>Medium</threshold>
           <effort>Default</effort>
           <xmlOutput>true</xmlOutput>
           <skip>${skipFindBugs}</skip>
