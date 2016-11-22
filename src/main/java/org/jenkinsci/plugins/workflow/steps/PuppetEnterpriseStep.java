@@ -169,7 +169,7 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
   public final PEResponse request(String endpoint, Integer port, String method, Map body) throws Exception {
     JSONObject jsonBody = new JSONObject(body);
     String responseString = "";
-    Object responseBody = new Object();
+    Object responseBody = null;
     String accessToken = getToken();
     PEResponse peResponse = null;
 

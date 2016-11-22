@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.puppetenterprise.models;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import hudson.security.ACL;
 import hudson.XmlFile;
 import hudson.model.Saveable;
@@ -85,6 +87,10 @@ public class PuppetEnterpriseConfig implements Serializable, Saveable {
     }
   }
 
+  @SuppressFBWarnings(
+    value = "SBSC_USE_STRINGBUFFER_CONCATENATION",
+    justification = "performance irrelevant compared to I/O, String much more convenient"
+  )
   public String getPuppetMasterUrl() {
     InputStreamReader is = null;
     BufferedReader br = null;
@@ -107,10 +113,8 @@ public class PuppetEnterpriseConfig implements Serializable, Saveable {
           String line = "";
 
           StringBuffer buf = new StringBuffer();
-          String line = br.readLine();
-          while (line != null) {
+          while ((line = br.readLine()) != null) {
             buf.append(line);
-            line = br.readLine();
           }
 
           is.close();
