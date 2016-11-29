@@ -60,18 +60,7 @@ public class CodeDeployStepTest extends Assert {
   public RestartableJenkinsRule story = new RestartableJenkinsRule();
 
   @Before
-  public void setup() { }
-
-  @Test
-  public void codeDeploy() throws Exception {
-
-    stubFor(post(urlEqualTo("/code-manager/v1/deploys"))
-        .withHeader("content-type", equalTo("application/json"))
-        .willReturn(aResponse()
-            .withStatus(200)
-            .withHeader("Content-Type", "application/json")
-            .withBody("[{\"environment\":\"production\", \"id\":6, \"status\":\"complete\", \"file-sync\":{\"environment-commit\":\"0d1bf46d5613a819ebb76ded56ebdedd0a326be3\",\"code-commit\":\"4bbf215913a801f1c090f5a58382c3009e4e5905\"}, \"deploy-signature\":\"45ddf48253c2ee7537aae05c7e674879fd8bb616\"}]")));
-
+  public void setup() {
     story.addStep(new Statement() {
       @Override
       public void evaluate() throws Throwable {
@@ -127,6 +116,23 @@ public class CodeDeployStepTest extends Assert {
         StringCredentialsImpl credential = new StringCredentialsImpl(CredentialsScope.GLOBAL, "pe-test-token", "PE test token", Secret.fromString("super_secret_token_string"));
         CredentialsStore store = CredentialsProvider.lookupStores(story.j.jenkins).iterator().next();
         store.addCredentials(Domain.global(), credential);
+      }
+    });
+  }
+
+  @Test
+  public void codeDeploySeparateCredentialsCallSuccessful() throws Exception {
+
+    stubFor(post(urlEqualTo("/code-manager/v1/deploys"))
+        .withHeader("content-type", equalTo("application/json"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody("[{\"environment\":\"production\", \"id\":6, \"status\":\"complete\", \"file-sync\":{\"environment-commit\":\"0d1bf46d5613a819ebb76ded56ebdedd0a326be3\",\"code-commit\":\"4bbf215913a801f1c090f5a58382c3009e4e5905\"}, \"deploy-signature\":\"45ddf48253c2ee7537aae05c7e674879fd8bb616\"}]")));
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
 
         //Create a job where the credentials are defined separately
         WorkflowJob separateCredsJob = story.j.jenkins.createProject(WorkflowJob.class, "Code Deploy with Credentials Defined Separately");
@@ -139,19 +145,87 @@ public class CodeDeployStepTest extends Assert {
 
         verify(postRequestedFor(urlMatching("/code-manager/v1/deploys"))
             .withRequestBody(equalToJson("{\"environments\": [\"production\"], \"wait\": true}"))
-            .withHeader("Content-Type", matching("application/json")));
+            .withHeader("Content-Type", matching("application/json"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+      }
+    });
+  }
 
+  @Test
+  public void codeDeployCredentialsInMethodSuccessful() throws Exception {
+
+    stubFor(post(urlEqualTo("/code-manager/v1/deploys"))
+        .withHeader("content-type", equalTo("application/json"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody("[{\"environment\":\"production\", \"id\":6, \"status\":\"complete\", \"file-sync\":{\"environment-commit\":\"0d1bf46d5613a819ebb76ded56ebdedd0a326be3\",\"code-commit\":\"4bbf215913a801f1c090f5a58382c3009e4e5905\"}, \"deploy-signature\":\"45ddf48253c2ee7537aae05c7e674879fd8bb616\"}]")));
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
         //Create a job where the credentials are defined as part of the codeDeploy method call
-        WorkflowJob integratedCredsJob = story.j.jenkins.createProject(WorkflowJob.class, "Code Deploy with Credentials Defined With Method Call");
-        integratedCredsJob.setDefinition(new CpsFlowDefinition(
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Code Deploy with Credentials Defined With Method Call");
+        job.setDefinition(new CpsFlowDefinition(
           "node { \n" +
           "  puppet.codeDeploy 'production', credentials: 'pe-test-token'\n" +
           "}", true));
-        story.j.assertBuildStatusSuccess(integratedCredsJob.scheduleBuild2(0));
+        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
 
         verify(postRequestedFor(urlMatching("/code-manager/v1/deploys"))
             .withRequestBody(equalToJson("{\"environments\": [\"production\"], \"wait\": true}"))
+            .withHeader("X-Authentication", matching("super_secret_token_string"))
             .withHeader("Content-Type", matching("application/json")));
+      }
+    });
+  }
+
+  @Test
+  public void codeDeployFailsOnNoSuchEnvironment() throws Exception {
+
+    stubFor(post(urlEqualTo("/code-manager/v1/deploys"))
+        .withHeader("content-type", equalTo("application/json"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody("[{\"environment\":\"nosuchenv\",\"id\":10,\"status\":\"failed\",\"error\":{\"kind\":\"puppetlabs.code-manager/deploy-failure\",\"details\":{\"corrected-env-name\":\"nosuchenv\"},\"msg\":\"Errors while deploying environment 'nosuchenv' (exit code: 1):\nERROR\t -> Environment(s) 'nosuchenv' cannot be found in any source and will not be deployed.\n\"}}]")));
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Code Deploy of Non-Existent Environment Fails");
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.codeDeploy 'nosuchenv', credentials: 'pe-test-token'\n" +
+          "}", true));
+        WorkflowRun result = job.scheduleBuild2(0).get();
+        story.j.assertBuildStatus(Result.FAILURE, result);
+      }
+    });
+  }
+
+  @Test
+  public void codeDeployFailsOnExpiredToken() throws Exception {
+
+    stubFor(post(urlEqualTo("/code-manager/v1/deploys"))
+        .withHeader("content-type", equalTo("application/json"))
+        .willReturn(aResponse()
+            .withStatus(401)
+            .withHeader("Content-Type", "application/json")
+            .withBody("{\"kind\":\"puppetlabs.rbac/token-expired\",\"msg\":\"The provided token has expired.\"}")));
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Code Deploy Fails on Expired Token");
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.codeDeploy 'production', credentials: 'pe-test-token'\n" +
+          "}", true));
+        WorkflowRun result = job.scheduleBuild2(0).get();
+        story.j.assertBuildStatus(Result.FAILURE, result);
       }
     });
   }
