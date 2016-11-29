@@ -111,9 +111,7 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
     return this.noop;
   }
 
-  @DataBoundConstructor public PuppetJobStep() {
-    super.loadConfig();
-  }
+  @DataBoundConstructor public PuppetJobStep() { }
 
   private static String parseJobId(String idUrl) {
     String[] jobUrlElements = idUrl.split("/");

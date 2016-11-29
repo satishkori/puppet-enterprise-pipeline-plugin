@@ -83,25 +83,16 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
   private static final Logger logger = Logger.getLogger(PuppetEnterpriseStep.class.getName());
 
   private String credentialsId;
-  private PuppetEnterpriseConfig config;
 
   @DataBoundSetter public void setCredentialsId(String credentialsId) {
     this.credentialsId = Util.fixEmpty(credentialsId);
   }
 
-  // @DataBoundSetter public void setPuppetMasterUrl(String url) {
-  //   this.config.setPuppetMasterUrl(url);
-  // }
-
-  public void loadConfig() {
-    this.config = new PuppetEnterpriseConfig();
-  }
-
   private static StringCredentials lookupCredentials(@Nonnull String credentialId) {
-      return CredentialsMatchers.firstOrNull(
-               CredentialsProvider.lookupCredentials(StringCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, null),
-               CredentialsMatchers.withId(credentialId)
-             );
+    return CredentialsMatchers.firstOrNull(
+      CredentialsProvider.lookupCredentials(StringCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, null),
+      CredentialsMatchers.withId(credentialId)
+    );
   }
 
   private String getToken() {
@@ -136,7 +127,7 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
     try {
       CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
-      String caString = config.getPuppetMasterCACertificate();
+      String caString = PuppetEnterpriseConfig.getPuppetMasterCACertificate();
       InputStream caStream = new ByteArrayInputStream(caString.getBytes(StandardCharsets.UTF_8));
       ca = cf.generateCertificate(caStream);
 
@@ -179,7 +170,7 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
       HttpResponse response = null;
 
       if (method.equals("POST")) {
-        HttpPost request = new HttpPost("https://" + config.getPuppetMasterUrl() + ":" + port + endpoint);
+        HttpPost request = new HttpPost("https://" + PuppetEnterpriseConfig.getPuppetMasterUrl() + ":" + port + endpoint);
 
         if (body != null) {
           request.addHeader("content-type", "application/json");
@@ -191,7 +182,7 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
       }
 
       if (method.equals("GET")) {
-        HttpGet request = new HttpGet("https://" + config.getPuppetMasterUrl() + ":" + port + endpoint);
+        HttpGet request = new HttpGet("https://" + PuppetEnterpriseConfig.getPuppetMasterUrl() + ":" + port + endpoint);
         request.addHeader("X-Authentication", accessToken);
         response = httpClient.execute(request);
       }
@@ -233,6 +224,6 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
   public String getCredentialsId() { return credentialsId; }
 
   public String getPuppetMasterUrl() {
-    return config.getPuppetMasterUrl();
+    return PuppetEnterpriseConfig.getPuppetMasterUrl();
   }
 }

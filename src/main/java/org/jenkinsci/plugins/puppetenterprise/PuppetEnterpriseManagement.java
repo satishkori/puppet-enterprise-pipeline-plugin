@@ -38,11 +38,8 @@ import org.jenkinsci.plugins.puppetenterprise.models.PuppetEnterpriseConfig;
 public class PuppetEnterpriseManagement extends ManagementLink {
   private static final String ICON_PATH = "/plugin/puppet-enterprise-pipeline/images/cfg_logo.png";
 
-  private PuppetEnterpriseConfig config;
 
-  public PuppetEnterpriseManagement() {
-    this.config = new PuppetEnterpriseConfig();
-  }
+  public PuppetEnterpriseManagement() { }
 
   public String getFullURL(){
     return Stapler.getCurrentRequest().getOriginalRequestURI().substring(1);
@@ -64,12 +61,12 @@ public class PuppetEnterpriseManagement extends ManagementLink {
   }
 
   public String getMaster() {
-    return config.getPuppetMasterUrl();
+    return PuppetEnterpriseConfig.getPuppetMasterUrl();
   }
 
   public FormValidation doCheckMaster(@QueryParameter String masterAddress) throws IOException, ServletException {
     try {
-      config.validatePuppetMasterUrl(masterAddress);
+      PuppetEnterpriseConfig.validatePuppetMasterUrl(masterAddress);
       return FormValidation.ok("Succesfully Communicated with Puppet master.");
     } catch(java.net.UnknownHostException e) {
       return FormValidation.error("Unknown host");
@@ -90,7 +87,7 @@ public class PuppetEnterpriseManagement extends ManagementLink {
     try {
       JSONObject json = req.getSubmittedForm().getJSONObject("config");
 
-      config.setPuppetMasterUrl(json.getString("masterAddress"));
+      PuppetEnterpriseConfig.setPuppetMasterUrl(json.getString("masterAddress"));
     } catch(Exception e) {
       throw new ServletException(e);
     }

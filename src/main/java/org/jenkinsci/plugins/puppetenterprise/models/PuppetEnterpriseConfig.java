@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.net.Socket;
+import java.util.HashMap;
 
 import org.apache.http.*;
 import org.apache.http.util.ExceptionUtils;
@@ -24,42 +25,50 @@ import org.apache.http.impl.client.*;
 import org.apache.http.conn.ssl.*;
 import org.apache.commons.io.IOUtils;
 
-public class PuppetEnterpriseConfig implements Serializable, Saveable {
-  private String puppetMasterUrl = null;
-  private String puppetMasterCACertificate = "";
+public final class PuppetEnterpriseConfig implements Serializable {
+  private static String puppetMasterUrl = null;
+  private static String puppetMasterCACertificate = "";
 
-  public PuppetEnterpriseConfig() {
+  private PuppetEnterpriseConfig() {
     loadGlobalConfig();
   }
 
-  public void validatePuppetMasterUrl(String url) throws IOException, java.net.UnknownHostException,
+  public static void validatePuppetMasterUrl(String url) throws IOException, java.net.UnknownHostException,
     java.security.NoSuchAlgorithmException, java.security.KeyStoreException, java.security.KeyManagementException, org.apache.http.conn.HttpHostConnectException  {
     //this makes a connection to the master, so if the connection fails, the given address is invalid
     retrievePuppetMasterCACertificate(url);
   }
 
-  public void setPuppetMasterUrl(String url) throws IOException, java.net.UnknownHostException,
+  public static void setPuppetMasterUrl(String url) throws IOException, java.net.UnknownHostException,
     java.security.NoSuchAlgorithmException, java.security.KeyStoreException, java.security.KeyManagementException, org.apache.http.conn.HttpHostConnectException  {
-    this.puppetMasterUrl = url;
-    this.puppetMasterCACertificate = retrievePuppetMasterCACertificate();
+    puppetMasterUrl = url;
+
+    if(puppetMasterCACertificate.isEmpty()) {
+      puppetMasterCACertificate = retrievePuppetMasterCACertificate();
+    }
+
     save();
   }
 
-  public void setPuppetMasterCACertificate(String cert) {
-    this.puppetMasterCACertificate = cert;
+  public static void setPuppetMasterCACertificate(String cert) {
+    puppetMasterCACertificate = cert;
+
+    try {
+      save();
+    } catch(IOException e) {e.printStackTrace();}
   }
 
-  public String getPuppetMasterCACertificate() {
-    return this.puppetMasterCACertificate;
+  public static String getPuppetMasterCACertificate() {
+    return puppetMasterCACertificate;
   }
 
-  private String retrievePuppetMasterCACertificate() throws java.net.UnknownHostException, IOException,
+  private static String retrievePuppetMasterCACertificate() throws java.net.UnknownHostException, IOException,
     java.security.NoSuchAlgorithmException, java.security.KeyStoreException, java.security.KeyManagementException, org.apache.http.conn.HttpHostConnectException {
 
-    return retrievePuppetMasterCACertificate(this.puppetMasterUrl);
+    return retrievePuppetMasterCACertificate(puppetMasterUrl);
   }
 
-  private String retrievePuppetMasterCACertificate(String address) throws java.net.UnknownHostException, IOException,
+  private static String retrievePuppetMasterCACertificate(String address) throws java.net.UnknownHostException, IOException,
     java.security.NoSuchAlgorithmException, java.security.KeyStoreException, java.security.KeyManagementException, org.apache.http.conn.HttpHostConnectException {
     String returnString = "";
 
@@ -76,11 +85,16 @@ public class PuppetEnterpriseConfig implements Serializable, Saveable {
     return returnString;
   }
 
-  public void loadGlobalConfig() {
+  public static void loadGlobalConfig() {
     try {
+      HashMap config = new HashMap();
+
       XmlFile xml = getConfigFile();
       if (xml.exists()) {
-        xml.unmarshal(this);
+        xml.unmarshal(config);
+
+        puppetMasterUrl = (String) config.get("puppetMasterUrl");
+        puppetMasterCACertificate = (String) config.get("puppetMasterCACertificate");
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -91,13 +105,13 @@ public class PuppetEnterpriseConfig implements Serializable, Saveable {
     value = "SBSC_USE_STRINGBUFFER_CONCATENATION",
     justification = "performance irrelevant compared to I/O, String much more convenient"
   )
-  public String getPuppetMasterUrl() {
+  public static String getPuppetMasterUrl() {
     InputStreamReader is = null;
     BufferedReader br = null;
     Process puppetCmd = null;
 
-    if (!this.puppetMasterUrl.equals("")) {
-      return this.puppetMasterUrl;
+    if (!puppetMasterUrl.equals("")) {
+      return puppetMasterUrl;
     } else {
       String puppetConfigPath = "/etc/puppetlabs/puppet/puppet.conf";
       File puppetFileHandler = new File(puppetConfigPath);
@@ -121,9 +135,9 @@ public class PuppetEnterpriseConfig implements Serializable, Saveable {
           br.close();
           puppetCmd.destroy();
 
-          this.puppetMasterUrl = buf.toString();
+          puppetMasterUrl = buf.toString();
         } else {
-          this.puppetMasterUrl = "https://puppet";
+          puppetMasterUrl = "https://puppet";
         }
 
         setPuppetMasterUrl(puppetMasterUrl);
@@ -157,18 +171,22 @@ public class PuppetEnterpriseConfig implements Serializable, Saveable {
       }
     }
 
-    return this.puppetMasterUrl;
+    return PuppetEnterpriseConfig.puppetMasterUrl;
   }
 
-  public void save() throws IOException {
-    getConfigFile().write(this);
+  public static void save() throws IOException {
+    HashMap config = new HashMap();
+    config.put("puppetMasterUrl", puppetMasterUrl);
+    config.put("puppetMasterCACertificate", puppetMasterCACertificate);
+
+    getConfigFile().write(config);
   }
 
   @SuppressFBWarnings(
     value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE",
     justification = "The values are asserted to not be null, but findbugs doesn't know that."
   )
-  public XmlFile getConfigFile() {
+  public static XmlFile getConfigFile() {
     File pe_config_file = new File(Jenkins.getInstance().getRootDir(), "puppet_enterprise.xml");
     assert pe_config_file != null;
 

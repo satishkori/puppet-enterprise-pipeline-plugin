@@ -56,9 +56,7 @@ public final class CodeDeployStep extends PuppetEnterpriseStep implements Serial
     return this.environment;
   }
 
-  @DataBoundConstructor public CodeDeployStep() {
-    super.loadConfig();
-  }
+  @DataBoundConstructor public CodeDeployStep() { }
 
   public static class CodeDeployStepExecution extends AbstractSynchronousStepExecution<Void> {
 
