@@ -28,7 +28,7 @@ class Puppet implements Serializable {
         script.error(message: "No Credentials provided for puppet.codeDeploy. Specify 'credentials' parameter or use puppet.credentials()")
       }
 
-      script.puppetCode(environment: env, credentialsId: credentialsId)
+      script.puppetCode(environment: env, credentialsId: credentials)
     }
   }
 
