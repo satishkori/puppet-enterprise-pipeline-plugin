@@ -50,7 +50,6 @@ public final class HieraStep extends AbstractStepImpl {
   private String key = "";
   private String source = "";
   private Object value = null;
-  private HieraConfig hiera = null;
 
   @DataBoundSetter private void setScope(String scope) {
     this.scope = Util.fixEmpty(scope);
@@ -68,7 +67,7 @@ public final class HieraStep extends AbstractStepImpl {
     this.source = source;
   }
 
-  public String getSceop() {
+  public String getScope() {
     return this.scope;
   }
 
@@ -84,12 +83,10 @@ public final class HieraStep extends AbstractStepImpl {
     return this.source;
   }
 
-  @DataBoundConstructor public HieraStep() {
-    hiera = new HieraConfig();
-  }
+  @DataBoundConstructor public HieraStep() { }
 
   public void save() {
-    hiera.setKeyValue(this.scope, this.key, this.source, this.value);
+    HieraConfig.setKeyValue(this.scope, this.key, this.source, this.value);
     logger.log(Level.INFO, "Successfully saved key/value pair " + this.key + "/" + this.value + " to scope " + this.scope + " from source " + this.source + ".");
   }
 

@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.puppetenterprise.models;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import hudson.security.ACL;
 import hudson.XmlFile;
 import hudson.model.Saveable;
@@ -85,7 +87,15 @@ public class PuppetEnterpriseConfig implements Serializable, Saveable {
     }
   }
 
+  @SuppressFBWarnings(
+    value = "SBSC_USE_STRINGBUFFER_CONCATENATION",
+    justification = "performance irrelevant compared to I/O, String much more convenient"
+  )
   public String getPuppetMasterUrl() {
+    InputStreamReader is = null;
+    BufferedReader br = null;
+    Process puppetCmd = null;
+
     if (!this.puppetMasterUrl.equals("")) {
       return this.puppetMasterUrl;
     } else {
@@ -95,17 +105,23 @@ public class PuppetEnterpriseConfig implements Serializable, Saveable {
         if (puppetFileHandler.exists()) {
           String cmd = "/opt/puppetlabs/bin/puppet config print server --config /etc/puppetlabs/puppet/puppet.conf";
 
-          Process p = Runtime.getRuntime().exec(cmd);
-          p.waitFor();
-          InputStreamReader is = new InputStreamReader(p.getInputStream(), "UTF-8");
-          BufferedReader br = new BufferedReader(is);
+          puppetCmd = Runtime.getRuntime().exec(cmd);
+          puppetCmd.waitFor();
+          is = new InputStreamReader(puppetCmd.getInputStream(), "UTF-8");
+          br = new BufferedReader(is);
 
-          String lines = "";
           String line = "";
 
-          while ((line = br.readLine()) != null) { lines = lines + line; }
+          StringBuffer buf = new StringBuffer();
+          while ((line = br.readLine()) != null) {
+            buf.append(line);
+          }
 
-          this.puppetMasterUrl = lines;
+          is.close();
+          br.close();
+          puppetCmd.destroy();
+
+          this.puppetMasterUrl = buf.toString();
         } else {
           this.puppetMasterUrl = "https://puppet";
         }
@@ -117,7 +133,28 @@ public class PuppetEnterpriseConfig implements Serializable, Saveable {
       } catch(java.security.NoSuchAlgorithmException e) {
       } catch(java.security.KeyStoreException e) {
       } catch(java.security.KeyManagementException e) {
-      } catch(InterruptedException e) {}
+      } catch(InterruptedException e) {
+      } finally {
+        if (is != null) {
+          try {
+            is.close();
+          } catch(IOException e) {
+            e.printStackTrace();
+          }
+        }
+
+        if (br != null) {
+          try {
+            br.close();
+          } catch(IOException e) {
+            e.printStackTrace();
+          }
+        }
+
+        if (puppetCmd != null) {
+          puppetCmd.destroy();
+        }
+      }
     }
 
     return this.puppetMasterUrl;
@@ -127,9 +164,16 @@ public class PuppetEnterpriseConfig implements Serializable, Saveable {
     getConfigFile().write(this);
   }
 
+  @SuppressFBWarnings(
+    value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE",
+    justification = "The values are asserted to not be null, but findbugs doesn't know that."
+  )
   public XmlFile getConfigFile() {
     File pe_config_file = new File(Jenkins.getInstance().getRootDir(), "puppet_enterprise.xml");
+    assert pe_config_file != null;
+
     XmlFile pe_config_xml = new XmlFile(pe_config_file);
+    assert pe_config_xml != null;
 
     return pe_config_xml;
   }

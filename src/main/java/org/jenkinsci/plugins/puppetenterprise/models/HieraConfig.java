@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.puppetenterprise.models;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import hudson.security.ACL;
 import hudson.XmlFile;
 import hudson.model.Saveable;
@@ -15,16 +17,16 @@ import java.io.BufferedReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class HieraConfig implements Serializable, Saveable {
+public final class HieraConfig implements Serializable {
   private static HashMap hierarchy = new HashMap();
 
   private static final Logger logger = Logger.getLogger(HieraConfig.class.getName());
 
-  public HieraConfig() {
+  private HieraConfig() {
     loadGlobalConfig();
   }
 
-  public Object getKeyValue(String scope, String key) {
+  public static Object getKeyValue(String scope, String key) {
     HashMap scopeHierarchy = (HashMap) HieraConfig.hierarchy.get(scope);
 
     if (scopeHierarchy == null) {
@@ -36,7 +38,7 @@ public class HieraConfig implements Serializable, Saveable {
     return keyData.get("value");
   }
 
-  public String getKeySource(String scope, String key) {
+  public static String getKeySource(String scope, String key) {
     HashMap scopeHierarchy = (HashMap) HieraConfig.hierarchy.get(scope);
 
     if (scopeHierarchy == null) {
@@ -48,16 +50,16 @@ public class HieraConfig implements Serializable, Saveable {
     return (String) keyData.get("source");
   }
 
-  public Set<String> getScopes() {
+  public static Set<String> getScopes() {
     return hierarchy.keySet();
   }
 
-  public Set<String> getKeys(String scope) {
+  public static Set<String> getKeys(String scope) {
     HashMap scopeHierarchy = (HashMap) hierarchy.get(scope);
     return scopeHierarchy.keySet();
   }
 
-  public void deleteScope(String scope) {
+  public static void deleteScope(String scope) {
     if (hierarchy.get(scope) == null) {
       logger.log(Level.WARNING, "Attempted to delete non-existent hiera Scope " + scope);
     } else {
@@ -71,7 +73,7 @@ public class HieraConfig implements Serializable, Saveable {
     }
   }
 
-  public void deleteKey(String key, String scope) {
+  public static void deleteKey(String key, String scope) {
     if (hierarchy.get(scope) == null) {
       logger.log(Level.WARNING, "Attempted to delete key '" + key + " from non-existent hiera Scope " + scope);
     } else {
@@ -91,7 +93,7 @@ public class HieraConfig implements Serializable, Saveable {
     }
   }
 
-  public void setKeyValue(String scope, String key, String source, Object value) {
+  public static void setKeyValue(String scope, String key, String source, Object value) {
     if (HieraConfig.hierarchy.get(scope) == null) {
       HieraConfig.hierarchy.put(scope, new HashMap());
     }
@@ -112,7 +114,7 @@ public class HieraConfig implements Serializable, Saveable {
     }
   }
 
-  public void loadGlobalConfig() {
+  public static void loadGlobalConfig() {
     try {
       XmlFile xml = getConfigFile();
       if (xml.exists()) {
@@ -123,14 +125,23 @@ public class HieraConfig implements Serializable, Saveable {
     }
   }
 
-  public void save() throws IOException {
+  public static void save() throws IOException {
     getConfigFile().write(HieraConfig.hierarchy);
   }
 
-  public XmlFile getConfigFile() {
+  @SuppressFBWarnings(
+    value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE",
+    justification = "The values are asserted to not be null, but findbugs doesn't know that."
+  )
+  public static XmlFile getConfigFile() {
     File rootDir = Jenkins.getInstance().getRootDir();
-    File hiera_store = new File(Objects.requireNonNull(rootDir), "puppet_enterprise_hiera_store.xml");
-    XmlFile hiera_store_xml = new XmlFile(Objects.requireNonNull(hiera_store));
+    assert rootDir != null;
+
+    File hiera_store = new File(rootDir, "puppet_enterprise_hiera_store.xml");
+    assert hiera_store != null;
+
+    XmlFile hiera_store_xml = new XmlFile(hiera_store);
+    assert hiera_store_xml != null;
 
     return hiera_store_xml;
   }
