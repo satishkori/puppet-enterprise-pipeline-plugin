@@ -129,7 +129,7 @@ public class CodeDeployStepTest extends Assert {
         store.addCredentials(Domain.global(), credential);
 
         //Create a job where the credentials are defined separately
-        WorkflowJob separateCredsJob = story.j.jenkins.createProject(WorkflowJob.class, "codeDeployWithCredentialsDefinedSeparately");
+        WorkflowJob separateCredsJob = story.j.jenkins.createProject(WorkflowJob.class, "Code Deploy with Credentials Defined Separately");
         separateCredsJob.setDefinition(new CpsFlowDefinition(
           "node { \n" +
           "  puppet.credentials 'pe-test-token'\n" +
