@@ -72,6 +72,7 @@ table th {
 
 table td {
   padding: 10px;
+  word-wrap: break-word;
 }
 
 button.delete-confirm {
