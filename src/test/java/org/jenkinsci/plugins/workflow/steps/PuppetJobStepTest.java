@@ -350,5 +350,43 @@ public class PuppetJobStepTest extends Assert {
             .withHeader("Content-Type", matching("application/json")));
       }
     });
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Passes Concurrency Parameter");
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.credentials 'pe-test-token'\n" +
+          "  puppet.job 'production', concurrency: 40\n" +
+          "}", true));
+        WorkflowRun result = job.scheduleBuild2(0).get();
+
+        verify(postRequestedFor(urlMatching("/orchestrator/v1/command/deploy"))
+            .withRequestBody(equalToJson("{\"environment\": \"production\", \"concurrency\": 40, \"noop\": false}"))
+            .withHeader("X-Authentication", matching("super_secret_token_string"))
+            .withHeader("Content-Type", matching("application/json")));
+      }
+    });
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Passes Noop Parameter");
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.credentials 'pe-test-token'\n" +
+          "  puppet.job 'production', noop: true\n" +
+          "}", true));
+        WorkflowRun result = job.scheduleBuild2(0).get();
+
+        verify(postRequestedFor(urlMatching("/orchestrator/v1/command/deploy"))
+            .withRequestBody(equalToJson("{\"environment\": \"production\", \"noop\": true}"))
+            .withHeader("X-Authentication", matching("super_secret_token_string"))
+            .withHeader("Content-Type", matching("application/json")));
+      }
+    });
   }
 }
