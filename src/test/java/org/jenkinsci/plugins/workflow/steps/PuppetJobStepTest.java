@@ -6,6 +6,8 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.ClassRule;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.runners.model.Statement;
 
 import static org.junit.Assert.*;
@@ -47,27 +49,16 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 
 import org.jenkinsci.plugins.puppetenterprise.models.PuppetEnterpriseConfig;
+import org.jenkinsci.plugins.puppetenterprise.TestUtils;
 
 public class PuppetJobStepTest extends Assert {
-
-  private static String CACERTPATH = "src/test/java/resources/certs/ca.cert.pem";
-  private static String JOBDETAILSPATH = "src/test/java/resources/api-responses/job_details.json";
-  private static String KEYSTOREPATH = "src/test/java/resources/server.keystore";
-  private static String KEYSTOREPASSWORD = "password";
 
   @ClassRule
   public static WireMockRule mockOrchestratorService = new WireMockRule(options()
     .dynamicPort()
     .httpsPort(8143)
-    .keystorePath(KEYSTOREPATH)
-    .keystorePassword(KEYSTOREPASSWORD));
-
-  @ClassRule
-  public static WireMockRule mockPuppetService = new WireMockRule(options()
-    .dynamicPort()
-    .httpsPort(8140)
-    .keystorePath(KEYSTOREPATH)
-    .keystorePassword(KEYSTOREPASSWORD));
+    .keystorePath(TestUtils.getKeystorePath())
+    .keystorePassword(TestUtils.getKeystorePassword()));
 
   @ClassRule
   public static BuildWatcher buildWatcher = new BuildWatcher();
@@ -77,11 +68,6 @@ public class PuppetJobStepTest extends Assert {
 
   @Before
   public void setup() {
-    mockPuppetService.stubFor(get(urlEqualTo("/puppet-ca/v1/certificate/ca"))
-        .willReturn(aResponse()
-            .withStatus(200)
-            .withBody(getCACertificateString())));
-
     story.addStep(new Statement() {
       @Override
       public void evaluate() throws Throwable {
@@ -100,50 +86,12 @@ public class PuppetJobStepTest extends Assert {
     });
   }
 
-  private String getFileContents(String file) {
-    BufferedReader br = null;
-
-    try {
-      br = new BufferedReader(new FileReader(file));
-    } catch(java.io.FileNotFoundException e) {
-      fail("Cannot find file " + file + ". Did someone delete it from the source?");
-    }
-
-    String fileContents = "";
-
-    try {
-      StringBuilder sb = new StringBuilder();
-      String line = br.readLine();
-
-      while (line != null) {
-        sb.append(line);
-        sb.append(System.lineSeparator());
-        line = br.readLine();
-      }
-      fileContents = sb.toString();
-    } catch(java.io.IOException e) {
-      fail(e.getMessage());
-    } finally {
-      try {
-        br.close();
-      } catch(java.io.IOException e){
-        e.printStackTrace();
-      }
-    }
-
-    return fileContents;
-  }
-
-  private String getCACertificateString() {
-    return getFileContents(CACERTPATH);
-  }
-
   private String getJobDetailsString() {
-    return getFileContents(JOBDETAILSPATH);
+    return TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "job_details.json");
   }
 
   private String getCommandDeployResponseString() {
-    return getFileContents("src/test/java/resources/api-responses/job_deploy.json");
+    return TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "job_deploy.json");
   }
 
   private void stubJobDeploySuccessful() {
@@ -252,7 +200,7 @@ public class PuppetJobStepTest extends Assert {
         .willReturn(aResponse()
             .withStatus(401)
             .withHeader("Content-Type", "application/json")
-            .withBody("{\"kind\":\"puppetlabs.rbac/token-expired\",\"msg\":\"The provided token has expired.\"}")));
+            .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "expired_token.json"))));
 
     story.addStep(new Statement() {
       @Override
