@@ -135,7 +135,7 @@ code management in Puppet Enterprise, go here: [https://docs.puppet.com/pe/lates
 
 **Parameters**
 
-* credentialsId - ID of the Jenkins Secret text credentials. String. Required if puppet.credentials not used
+* credentials - ID of the Jenkins Secret text credentials. String. Required if puppet.credentials not used
 * concurrency - Level of maximum concurrency when issuing Puppet runs. Defaults to unlimited. Integer.
 * noop - Whether to run Puppet in noop mode. Defaults to false. Boolean
 
@@ -157,7 +157,7 @@ The following parameters should be used with Puppet Enterprise 2016.4+ for defin
 ```
   puppet.job 'staging'
   puppet.job 'production', concurrency: 10, noop: true
-  puppet.job 'production', concurrency: 10, noop: true, credentialsId: 'pe-access-token'
+  puppet.job 'production', concurrency: 10, noop: true, credentials: 'pe-access-token'
   puppet.job 'production', nodes: ['node1.example.com','node2.example.com']
   puppet.job 'production', application: Rgbank
   puppet.job 'production', application: Rgbank[phase-1]
