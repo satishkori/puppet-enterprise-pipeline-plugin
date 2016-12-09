@@ -128,8 +128,7 @@ This method returns an ArrayList object that can be stored in a variable and ite
 
 ```
   puppet.query 'nodes[certname] { catalog_environment = "staging" }', credentials: 'pe-access-token'
-  puppet.query 'inventory[certname] { trusted.extensions.pp_role = "MyApp" }'
-  puppet.query 'inventory[certname] { trusted.extensions.pp_role = "MyApp" }'
+  results = puppet.query 'inventory[certname] { trusted.extensions.pp_role = "MyApp" }'
 
   //The following gets production nodes with failed report, extracts just their
   // certnames, then groups them by three, and finally runs Puppet on each
