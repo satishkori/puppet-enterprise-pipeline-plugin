@@ -110,6 +110,42 @@ used for all other Puppet pipeline step methods.
   puppet.credentials 'pe-access-token'
 ```
 
+### puppet.query
+
+The `puppet.query` method queries PuppetDB using the PQL query language. To
+learn more about PQL, go here:
+[https://docs.puppet.com/puppetdb/4.3/api/query/v4/pql.html]
+
+This method returns an ArrayList object that can be stored in a variable and iterated on.
+
+**groovy script invocation**: puppet.query 'query'
+
+**Parameters**
+
+* credentials - The Jenkins credentials storing the PE RBAC token. String. Required if puppet.credentials not used.
+
+**Example**
+
+```
+  puppet.query 'nodes[certname] { catalog_environment = "staging" }', credentials: 'pe-access-token'
+  puppet.query 'inventory[certname] { trusted.extensions.pp_role = "MyApp" }'
+  puppet.query 'inventory[certname] { trusted.extensions.pp_role = "MyApp" }'
+
+  //The following gets production nodes with failed report, extracts just their
+  // certnames, then groups them by three, and finally runs Puppet on each
+  // group of three.
+  results = puppet.query 'nodes { latest_report_status = "failed" and catalog_environment = "production"}'
+  nodes = []
+  for (ArrayList node : results) {
+    nodes.add(node.certname)
+  }
+  nodesubgroups = results.collate(3) //Break results into groups of 3
+  for (String certnames : nodegroups) {
+    puppet.job 'production' nodes: certnames
+  }
+  
+```
+
 ### puppet.codeDeploy
 
 The `puppet.codeDeploy` method tells Puppet Enterprise to deploy new Puppet code,

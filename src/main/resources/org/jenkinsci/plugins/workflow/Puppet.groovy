@@ -14,6 +14,24 @@ class Puppet implements Serializable {
     credentialsId = creds
   }
 
+  public <V> V query(Map parameters = [:], String query) {
+    String credentials
+
+    node {
+      if (parameters.credentials) {
+        credentials = parameters.credentials
+      } else {
+        credentials = credentialsId
+      }
+
+      if(credentials == null) {
+        script.error(message: "No Credentials provided for puppet.query. Specify 'credentials' parameter or use puppet.credentials()")
+      }
+
+      script.puppetQuery(query: query, credentialsId: credentials)
+    }
+  }
+
   public <V> V codeDeploy(Map parameters = [:], String env) {
     String credentials
 
