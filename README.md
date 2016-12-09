@@ -135,14 +135,13 @@ This method returns an ArrayList object that can be stored in a variable and ite
   // group of three.
   results = puppet.query 'nodes { latest_report_status = "failed" and catalog_environment = "production"}'
   nodes = []
-  for (ArrayList node : results) {
+  for (Map node : results) {
     nodes.add(node.certname)
   }
-  nodesubgroups = results.collate(3) //Break results into groups of 3
+  nodesubgroups = nodes.collate(3) //Break results into groups of 3
   for (String certnames : nodesubgroups ) {
-    puppet.job 'production' nodes: certnames
+    puppet.job 'production', nodes: certnames
   }
-  
 ```
 
 ### puppet.codeDeploy
