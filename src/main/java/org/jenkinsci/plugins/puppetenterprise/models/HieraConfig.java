@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.HashMap;
 import java.io.Serializable;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
@@ -27,9 +28,13 @@ public final class HieraConfig implements Serializable {
   }
 
   public static Object getKeyValue(String scope, String key) {
+    if (HieraConfig.hierarchy.get(scope) == null) {
+      return null;
+    }
+
     HashMap scopeHierarchy = (HashMap) HieraConfig.hierarchy.get(scope);
 
-    if (scopeHierarchy == null) {
+    if (scopeHierarchy.get(key) == null) {
       return null;
     }
 
@@ -119,6 +124,10 @@ public final class HieraConfig implements Serializable {
       XmlFile xml = getConfigFile();
       if (xml.exists()) {
         HieraConfig.hierarchy = (HashMap) xml.read();
+      } else {
+        File rootDir = Jenkins.getInstance().getRootDir();
+        File hiera_store = new File(rootDir, "puppet_enterprise_hiera_store.xml");
+        new FileOutputStream(hiera_store).close();
       }
     } catch (IOException e) {
       logger.log(Level.SEVERE, "Error loading Hiera configuration: " + e.getMessage());
