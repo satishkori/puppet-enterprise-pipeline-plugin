@@ -26,16 +26,46 @@ public class HieraDataStore implements RootAction {
   }
 
   public String[] getKeys(String scope) {
+    //For some reason the Jenkins repeatable jelly tag
+    // has a null value for the first element in any of its
+    // lists, despite no methods in this class returning a
+    // list with a null index. The only way I can find to
+    // work around it is to detect a null request and
+    // send back a null value.
+    if (scope == null) {
+      return null;
+    }
+
     Set<String> keySet = HieraConfig.getKeys(scope);
     return keySet.toArray(new String[keySet.size()]);
   }
 
   public String getKeyValue(String scope, String key) {
+    //For some reason the Jenkins repeatable jelly tag
+    // has a null value for the first element in any of its
+    // lists, despite no methods in this class returning a
+    // list with a null index. The only way I can find to
+    // work around it is to detect a null request and
+    // send back a null value.
+    if (scope == null || key == null) {
+      return null;
+    }
+
     Object value = HieraConfig.getKeyValue(scope, key);
     return value.toString();
   }
 
   public String getKeySource(String scope, String key) {
+    //For some reason the Jenkins repeatable jelly tag
+    // has a null value for the first element in any of its
+    // lists, despite no methods in this class returning a
+    // list with a null index. The only way I can find to
+    // work around it is to detect a null request and
+    // send back a null value.
+    if (scope == null || key == null) {
+      return null;
+    }
+
     String source = HieraConfig.getKeySource(scope, key);
     return source;
   }
