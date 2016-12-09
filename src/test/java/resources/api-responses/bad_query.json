@@ -1,0 +1,9 @@
+PQL parse error at line 1, column 7:
+
+nodes badquery {}
+      ^
+
+Expected one of:
+
+{
+[
