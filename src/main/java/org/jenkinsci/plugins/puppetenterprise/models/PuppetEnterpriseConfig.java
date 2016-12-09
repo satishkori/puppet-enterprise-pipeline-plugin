@@ -110,7 +110,7 @@ public final class PuppetEnterpriseConfig implements Serializable {
     BufferedReader br = null;
     Process puppetCmd = null;
 
-    if (!puppetMasterUrl.equals("")) {
+    if (puppetMasterUrl != null && !puppetMasterUrl.equals("")) {
       return puppetMasterUrl;
     } else {
       String puppetConfigPath = "/etc/puppetlabs/puppet/puppet.conf";
@@ -137,7 +137,7 @@ public final class PuppetEnterpriseConfig implements Serializable {
 
           puppetMasterUrl = buf.toString();
         } else {
-          puppetMasterUrl = "https://puppet";
+          puppetMasterUrl = "puppet";
         }
 
         setPuppetMasterUrl(puppetMasterUrl);

@@ -84,7 +84,7 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
 
   private String credentialsId;
 
-  static {
+  public static void main() {
     PuppetEnterpriseConfig.loadGlobalConfig();
   }
 
@@ -124,7 +124,7 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
     return ks;
   }
 
-  private CloseableHttpClient createHttpClient() {
+  private CloseableHttpClient createHttpClient() throws IOException {
     java.security.cert.Certificate ca;
     SSLConnectionSocketFactory sslsf = null;
 
@@ -147,7 +147,6 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
 
     } catch(CertificateException e) { logger.log(Level.SEVERE, e.getMessage()); }
       catch(KeyStoreException e) { logger.log(Level.SEVERE, e.getMessage()); }
-      catch(IOException e) { logger.log(Level.SEVERE, e.getMessage()); }
       catch(NoSuchAlgorithmException e) { logger.log(Level.SEVERE, e.getMessage()); }
       catch(KeyManagementException e) { logger.log(Level.SEVERE, e.getMessage()); }
 
@@ -167,8 +166,20 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
     Object responseBody = null;
     String accessToken = getToken();
     PEResponse peResponse = null;
+    HttpClient httpClient = null;
 
-    HttpClient httpClient = createHttpClient();
+    try {
+      httpClient = createHttpClient();
+    } catch(IOException e) {
+      logger.log(Level.SEVERE, e.getMessage());
+      throw new Exception(e.getMessage());
+    }
+
+    if (PuppetEnterpriseConfig.getPuppetMasterUrl() == null || PuppetEnterpriseConfig.getPuppetMasterUrl().isEmpty()) {
+      String message = "The Puppet Enterprise master address has not been configured yet. Configure the Puppet Enterprise page under Manage Jenkins.";
+      logger.log(Level.SEVERE, message);
+      throw new Exception(message);
+    }
 
     try {
       HttpResponse response = null;
