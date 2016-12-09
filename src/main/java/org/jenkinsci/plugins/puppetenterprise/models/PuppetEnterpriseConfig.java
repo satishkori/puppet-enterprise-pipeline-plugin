@@ -29,6 +29,10 @@ public final class PuppetEnterpriseConfig implements Serializable {
   private static String puppetMasterUrl = null;
   private static String puppetMasterCACertificate = "";
 
+  static {
+    loadGlobalConfig();
+  }
+
   private PuppetEnterpriseConfig() {
     loadGlobalConfig();
   }
