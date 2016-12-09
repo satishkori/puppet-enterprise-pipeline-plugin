@@ -89,7 +89,6 @@ public final class QueryStep extends PuppetEnterpriseStep implements Serializabl
 
   public Boolean isSuccessful(PEResponse response) {
     Integer responseCode = response.getResponseCode();
-    Object responseBody = response.getResponseBody();
 
     if (responseCode < 200 || responseCode >= 300) {
       return false;
