@@ -119,6 +119,10 @@ public final class HieraConfig implements Serializable {
     }
   }
 
+  @SuppressFBWarnings(
+    value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE",
+    justification = "The getInstance is never null or the code can't be running."
+  )
   public static void loadGlobalConfig() {
     try {
       XmlFile xml = getConfigFile();
