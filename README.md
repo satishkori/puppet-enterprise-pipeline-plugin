@@ -140,7 +140,7 @@ This method returns an ArrayList object that can be stored in a variable and ite
     nodes.add(node.certname)
   }
   nodesubgroups = results.collate(3) //Break results into groups of 3
-  for (String certnames : nodegroups) {
+  for (String certnames : nodesubgroups ) {
     puppet.job 'production' nodes: certnames
   }
   
