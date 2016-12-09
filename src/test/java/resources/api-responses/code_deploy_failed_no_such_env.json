@@ -1,0 +1,1 @@
+[{"environment":"nosuchenv","id":10,"status":"failed","error":{"kind":"puppetlabs.code-manager/deploy-failure","details":{"corrected-env-name":"nosuchenv"},"msg":"Errors while deploying environment 'nosuchenv' (exit code: 1):\nERROR\t -> Environment(s) 'nosuchenv' cannot be found in any source and will not be deployed.\n"}}]

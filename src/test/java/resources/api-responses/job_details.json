@@ -1,0 +1,63 @@
+ {
+   "report" : {
+     "id" : "https://localhost:8143/orchestrator/v1/jobs/714/report"
+   },
+   "name" : "714",
+   "events" : {
+     "id" : "https://localhost:8143/orchestrator/v1/jobs/714/events"
+   },
+   "state" : "finished",
+   "nodes" : {
+     "id" : "https://localhost:8143/orchestrator/v1/jobs/714/nodes"
+   },
+   "status" : [ {
+     "state" : "new",
+     "enter_time" : "2016-11-30T05:35:16Z",
+     "exit_time" : "2016-11-30T05:35:17Z"
+   }, {
+     "state" : "ready",
+     "enter_time" : "2016-11-30T05:35:17Z",
+     "exit_time" : "2016-11-30T05:35:17Z"
+   }, {
+     "state" : "running",
+     "enter_time" : "2016-11-30T05:35:17Z",
+     "exit_time" : "2016-11-30T05:35:17Z"
+   }, {
+     "state" : "finished",
+     "enter_time" : "2016-11-30T05:35:17Z",
+     "exit_time" : null
+   } ],
+   "id" : "https://localhost:8143/orchestrator/v1/jobs/714",
+   "environment" : {
+     "name" : "production"
+   },
+   "options" : {
+     "concurrency" : null,
+     "noop" : false,
+     "trace" : false,
+     "debug" : false,
+     "scope" : {
+       "whole_environment" : true
+     },
+     "enforce_environment" : true,
+     "environment" : "production",
+     "evaltrace" : false,
+     "target" : "whole environment"
+   },
+   "timestamp" : "2016-11-30T05:35:17Z",
+   "owner" : {
+     "email" : "casey@test.com",
+     "is_revoked" : false,
+     "last_login" : "2016-11-30T04:55:03.625Z",
+     "is_remote" : true,
+     "login" : "casey",
+     "inherited_role_ids" : [ 3, 2 ],
+     "group_ids" : [ "76fa0087-980f-49c4-915a-b20de7405b31", "38da1d42-a50c-489c-a6d0-3d5525662778" ],
+     "is_superuser" : false,
+     "id" : "885c5177-1ea5-416f-bf09-2858bef5c46b",
+     "role_ids" : [ 3, 1 ],
+     "display_name" : "Casey London",
+    "is_group" : false
+  },
+  "node_count" : 11
+}

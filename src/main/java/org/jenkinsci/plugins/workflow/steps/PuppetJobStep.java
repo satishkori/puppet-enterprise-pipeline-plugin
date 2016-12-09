@@ -146,7 +146,9 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
           scope.put("application", step.getApplication());
         }
 
-        body.put("scope", scope);
+        if (!scope.isEmpty()) {
+          body.put("scope", scope);
+        }
       }
 
       if (step.getConcurrency() != null) {
