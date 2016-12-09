@@ -84,6 +84,10 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
 
   private String credentialsId;
 
+  static {
+    PuppetEnterpriseConfig.loadGlobalConfig();
+  }
+
   @DataBoundSetter public void setCredentialsId(String credentialsId) {
     this.credentialsId = Util.fixEmpty(credentialsId);
   }
@@ -223,7 +227,4 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
 
   public String getCredentialsId() { return credentialsId; }
 
-  public String getPuppetMasterUrl() {
-    return PuppetEnterpriseConfig.getPuppetMasterUrl();
-  }
 }

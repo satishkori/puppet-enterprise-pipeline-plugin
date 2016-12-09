@@ -43,7 +43,7 @@ public final class PuppetEnterpriseConfig implements Serializable {
     java.security.NoSuchAlgorithmException, java.security.KeyStoreException, java.security.KeyManagementException, org.apache.http.conn.HttpHostConnectException  {
     puppetMasterUrl = url;
 
-    if(puppetMasterCACertificate.isEmpty()) {
+    if(puppetMasterCACertificate == null || puppetMasterCACertificate.isEmpty()) {
       puppetMasterCACertificate = retrievePuppetMasterCACertificate();
     }
 
@@ -91,7 +91,7 @@ public final class PuppetEnterpriseConfig implements Serializable {
 
       XmlFile xml = getConfigFile();
       if (xml.exists()) {
-        xml.unmarshal(config);
+        config = (HashMap) xml.unmarshal(config);
 
         puppetMasterUrl = (String) config.get("puppetMasterUrl");
         puppetMasterCACertificate = (String) config.get("puppetMasterCACertificate");
