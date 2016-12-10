@@ -23,16 +23,21 @@ public final class HieraConfig implements Serializable {
 
   private static final Logger logger = Logger.getLogger(HieraConfig.class.getName());
 
-  static {
-    loadGlobalConfig();
-  }
-
   private HieraConfig() {
     loadGlobalConfig();
   }
 
   public static Object getKeyValue(String scope, String key) {
+    if (HieraConfig.hierarchy.get(scope) == null) {
+      return null;
+    }
+
     HashMap scopeHierarchy = (HashMap) HieraConfig.hierarchy.get(scope);
+
+    if (scopeHierarchy.get(key) == null) {
+      return null;
+    }
+
     HashMap keyData = (HashMap) scopeHierarchy.get(key);
 
     return keyData.get("value");
@@ -40,6 +45,11 @@ public final class HieraConfig implements Serializable {
 
   public static String getKeySource(String scope, String key) {
     HashMap scopeHierarchy = (HashMap) HieraConfig.hierarchy.get(scope);
+
+    if (scopeHierarchy == null) {
+      return null;
+    }
+
     HashMap keyData = (HashMap) scopeHierarchy.get(key);
 
     return (String) keyData.get("source");
