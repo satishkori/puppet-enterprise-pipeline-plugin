@@ -25,11 +25,12 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 
 import org.jenkinsci.plugins.workflow.steps.CodeDeployStepTest;
 import org.jenkinsci.plugins.workflow.steps.PuppetJobStepTest;
+import org.jenkinsci.plugins.workflow.steps.HieraStepTest;
 import org.jenkinsci.plugins.workflow.steps.QueryStepTest;
 import org.jenkinsci.plugins.puppetenterprise.TestUtils;
 
 @RunWith(Suite.class)
-@SuiteClasses({PuppetJobStepTest.class, CodeDeployStepTest.class, QueryStepTest.class})
+@SuiteClasses({PuppetJobStepTest.class, CodeDeployStepTest.class, HieraStepTest.class, QueryStepTest.class})
 public class TestBase {
 
   private static WireMockServer mockPuppetServer;
