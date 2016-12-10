@@ -19,7 +19,7 @@ node {
   // is run on each group, pausing after each group for approval
   // to continue.
   stage 'Deploy to production'
-  production_app_nodes = puppet.query 'inventory[certname] { trusted.extentions.pp_application == "App" and environment == "production" }'
+  production_app_nodes = puppet.query 'inventory[certname] { trusted.extentions.pp_application = "App" and environment = "production" }'
   certnames = []
   for (Map node : app_nodes ) {
     certnames.add(node.certname) //Extract the certnames from the query results
