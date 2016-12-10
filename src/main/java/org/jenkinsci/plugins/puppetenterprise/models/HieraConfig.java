@@ -23,6 +23,10 @@ public final class HieraConfig implements Serializable {
 
   private static final Logger logger = Logger.getLogger(HieraConfig.class.getName());
 
+  static {
+    loadGlobalConfig();
+  }
+
   private HieraConfig() {
     loadGlobalConfig();
   }
