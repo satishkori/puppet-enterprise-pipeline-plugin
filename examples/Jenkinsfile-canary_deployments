@@ -13,8 +13,8 @@ node {
   //
 
   stage 'Deploy to production'
-  puppet.job 'production', query: 'inventory[certname] { trusted.extentions.pp_application = "App" } order by certname limit 10'
+  puppet.job 'production', query: 'inventory[certname] { trusted.extentions.pp_application == "App" and environment == "production" } order by certname limit 10'
 
   input "Deploy to the rest?"
-  puppet.job 'production', query: 'inventory[certname] { trusted.extentions.pp_application = "App" }'
+  puppet.job 'production', query: 'inventory[certname] { trusted.extentions.pp_application == "App" and environment == "production" }'
 }
