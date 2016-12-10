@@ -12,10 +12,21 @@ node {
   // pipeline stuff here
   //
 
-  //Deploy to 10 at a time
+  //The following code uses PQL to retrieve all nodes in production
+  // with pp_application trusted fact value of "App". Then the nodes'
+  // certnames are extracted from the query results. Finally,
+  // the list of certnames are broken into groups of 10 and Puppet
+  // is run on each group, pausing after each group for approval
+  // to continue.
   stage 'Deploy to production'
-  puppet.job 'production', query: 'inventory[certname] { trusted.extentions.pp_application = "App" } order by certname limit 10'
-  puppet.job 'production', query: 'inventory[certname] { trusted.extentions.pp_application = "App" } order by certname limit 10 offset 10'
-  puppet.job 'production', query: 'inventory[certname] { trusted.extentions.pp_application = "App" } order by certname limit 10 offset 20'
-  puppet.job 'production', query: 'inventory[certname] { trusted.extentions.pp_application = "App" } order by certname limit 10 offset 30'
+  production_app_nodes = puppet.query 'inventory[certname] { trusted.extentions.pp_application == "App" and environment == "production" }'
+  certnames = []
+  for (Map node : app_nodes ) {
+    certnames.add(node.certname) //Extract the certnames from the query results
+  }
+  phase_groups = certnames.collate(10) //Break node list into groups of 10
+  for (ArrayList phase_nodes : phase_groups) {
+    puppet.job 'production', nodes: phase_nodes //Run Puppet on each sub group
+    input 'Ready to continue?' //Pause the deployment between phases for review
+  }
 }
