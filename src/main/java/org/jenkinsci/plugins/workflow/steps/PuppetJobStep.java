@@ -164,22 +164,27 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
       if (!step.isSuccessful(result)) {
         String error = null;
 
-        if (responseHash.get("error") instanceof HashMap) {
-          HashMap errorHash = (HashMap) responseHash.get("error");
-          error = errorHash.toString();
-        } else if (responseHash.get("error") instanceof String) {
-          String errorString = (String) responseHash.get("error");
-          error = errorString;
-        } else if (responseHash.get("error") instanceof ArrayList) {
-          ArrayList errorArray = (ArrayList) responseHash.get("error");
-          error = errorArray.toString();
+        if (responseHash.get("error") != null) {
+          if (responseHash.get("error") instanceof HashMap) {
+            HashMap errorHash = (HashMap) responseHash.get("error");
+            error = errorHash.toString();
+          } else if (responseHash.get("error") instanceof String) {
+            String errorString = (String) responseHash.get("error");
+            error = errorString;
+          } else if (responseHash.get("error") instanceof ArrayList) {
+            ArrayList errorArray = (ArrayList) responseHash.get("error");
+            error = errorArray.toString();
+          }
+        }
+
+        if (responseHash.get("msg") != null) {
+          error = (String) responseHash.get("msg");
         }
 
         if (result.getResponseCode() == 404 && error == null) {
           error = "Environment " + step.getEnvironment() + " not found";
         }
 
-        logger.log(Level.SEVERE, error);
         throw new PEException(error, result.getResponseCode());
       }
 
