@@ -186,6 +186,7 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
       HashMap job = new HashMap();
       String jobID = "";
       String jobStatus = "";
+      HashMap jobStatusResponseHash = new HashMap();
 
       try {
         job = (HashMap) responseHash.get("job");
@@ -216,10 +217,9 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
         }
 
         PEResponse jobStatusResponse = step.request(peRequestPath, peRequestPort, "GET", null);
-        HashMap jobStatusResponseHash = (HashMap) jobStatusResponse.getResponseBody();
+        jobStatusResponseHash = (HashMap) jobStatusResponse.getResponseBody();
 
         if (!step.isSuccessful(jobStatusResponse)) {
-          listener.getLogger().println("Successfully created Puppet job " + parseJobId(jobID));
           throw new PEException(jobStatusResponseHash.toString(), jobStatusResponse.getResponseCode());
         }
 
@@ -236,16 +236,65 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
         }
       } while (!jobStatus.equals("finished") && !jobStatus.equals("stopped") && !jobStatus.equals("failed"));
 
+      PEResponse nodes_response = step.request("/orchestrator/v1/jobs/" + parseJobId(jobID) + "/nodes", 8143, "GET", null);
+      jobStatusResponseHash.put("nodes", (HashMap) nodes_response.getResponseBody());
+      jobStatusResponseHash.put("status", jobStatus);
+
       if (jobStatus.equals("failed") || jobStatus.equals("stopped")) {
-        throw new PEException("Job " + parseJobId(jobID) + " " + jobStatus, listener);
-      } else {
-        listener.getLogger().println("Successfully ran Puppet job " + parseJobId(jobID));
+        String message = "Puppet job " + parseJobId(jobID) + " " + jobStatus + "\n---------\n" + step.formatReport(jobStatusResponseHash);
+        listener.getLogger().println(message);
+        throw new PEException(message, listener);
       }
+
+      String message = "Successfully ran Puppet job " + parseJobId(jobID) + "\n---------\n" + step.formatReport(jobStatusResponseHash);
+      listener.getLogger().println(message);
 
       return null;
     }
 
     private static final long serialVersionUID = 1L;
+  }
+
+  public String formatReport(HashMap report) {
+    StringBuilder formattedReport = new StringBuilder();
+
+    formattedReport.append("Puppet Job Name: " + ((String) report.get("name")) + "\n");
+    formattedReport.append("Status: " + ((String) report.get("status")) + "\n");
+    formattedReport.append("Environment: " + ((String)((HashMap) report.get("environment")).get("name")) + "\n");
+    formattedReport.append("Nodes: " + (String) report.get("node_count") + "\n\n");
+
+    ArrayList<HashMap> nodes = (ArrayList) ((HashMap) report.get("nodes")).get("items");
+    for (HashMap node : nodes ) {
+      formattedReport.append((String) node.get("name") + "\n");
+
+      HashMap node_details = (HashMap) node.get("details");
+      HashMap metrics = (HashMap) node_details.get("metrics");
+      String failed = (String) metrics.get("failed");
+      String changed = (String) metrics.get("changed");
+      String skipped = (String) metrics.get("skipped");
+      String corrective = null;
+
+      if (metrics.get("corrective_change") != null) {
+        corrective = (String) metrics.get("corrective_change");
+      }
+
+      formattedReport.append("  Resource Events: ");
+      formattedReport.append(failed + " failed   ");
+      formattedReport.append(changed + " changed   ");
+
+      //PE versions prior to 2016.4 do not include corrective changes
+      if (corrective != null) {
+        formattedReport.append(corrective + " corrective   ");
+      }
+
+      formattedReport.append(skipped + " skipped    ");
+      formattedReport.append("\n");
+
+      formattedReport.append("  Report URL: " + (String) node_details.get("report-url") + "\n");
+      formattedReport.append("\n");
+    }
+
+    return formattedReport.toString();
   }
 
   public Boolean isSuccessful(PEResponse response) {
