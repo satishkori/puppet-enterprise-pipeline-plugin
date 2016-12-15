@@ -36,6 +36,9 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.internal.LinkedTreeMap;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
@@ -45,9 +48,6 @@ import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import org.jenkinsci.plugins.puppetenterprise.models.HieraConfig;
 import org.jenkinsci.plugins.puppetenterprise.TestUtils;
 
-import org.json.*;
-import com.json.parsers.*;
-import com.json.exceptions.JSONParsingException;
 
 import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
@@ -68,8 +68,8 @@ public class HieraStepTest extends Assert {
   @Rule
   public RestartableJenkinsRule story = new RestartableJenkinsRule();
 
-  private HashMap lookup(String scope, String key) {
-    HashMap responseHash = new HashMap();
+  private LinkedTreeMap lookup(String scope, String key) {
+    LinkedTreeMap responseHash = new LinkedTreeMap();
 
     try {
       String url = story.j.jenkins.getRootUrl() + "/hiera/lookup?scope=" + scope + "&key=" + key;
@@ -82,11 +82,8 @@ public class HieraStepTest extends Assert {
       String json = IOUtils.toString(response.getEntity().getContent());
       System.out.println("RETURNED BODY WAS: " + json);
       if (response.getStatusLine().getStatusCode() != 404 && !json.isEmpty()) {
-        JsonParserFactory factory = JsonParserFactory.getInstance();
-        JSONParser parser = factory.newJsonParser();
-        System.out.println("output is: " + json);
-        Object responseBody = parser.parseJson(json);
-        responseHash = (HashMap) responseBody;
+        Object responseBody = new Gson().fromJson(json, Object.class);
+        responseHash = (LinkedTreeMap) responseBody;
       }
     } catch(java.net.MalformedURLException e) {
       fail(e.getMessage());
@@ -103,7 +100,7 @@ public class HieraStepTest extends Assert {
     story.addStep(new Statement() {
       @Override
       public void evaluate() throws Throwable {
-        HashMap response = new HashMap();
+        LinkedTreeMap response = new LinkedTreeMap();
 
         HieraConfig.deleteKey("testkey", "existing");
         response = lookup("existing", "testkey");
@@ -131,7 +128,7 @@ public class HieraStepTest extends Assert {
     story.addStep(new Statement() {
       @Override
       public void evaluate() throws Throwable {
-        HashMap response = new HashMap();
+        LinkedTreeMap response = new LinkedTreeMap();
 
         HieraConfig.deleteScope("new");
         response = lookup("new", "testvalue");
@@ -158,7 +155,7 @@ public class HieraStepTest extends Assert {
     story.addStep(new Statement() {
       @Override
       public void evaluate() throws Throwable {
-        HashMap response = new HashMap();
+        LinkedTreeMap response = new LinkedTreeMap();
 
         HieraConfig.setKeyValue("existing", "testkey", "Set Hiera Key/Value pair in existing scope", "oldvalue");
         response = lookup("existing", "testkey");

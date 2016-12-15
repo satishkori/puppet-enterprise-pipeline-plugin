@@ -16,6 +16,7 @@ import hudson.model.Item;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 import javax.annotation.Nonnull;
+import com.google.gson.internal.LinkedTreeMap;
 
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
@@ -65,7 +66,7 @@ public final class CodeDeployStep extends PuppetEnterpriseStep implements Serial
     @StepContextParameter private transient TaskListener listener;
 
     @Override protected Void run() throws Exception {
-      HashMap body = new HashMap();
+      LinkedTreeMap body = new LinkedTreeMap();
       ArrayList environments = new ArrayList();
       environments.add(step.getEnvironment());
 
@@ -75,16 +76,16 @@ public final class CodeDeployStep extends PuppetEnterpriseStep implements Serial
       PEResponse result = step.request("/code-manager/v1/deploys", 8170, "POST", body);
 
       if (!step.isSuccessful(result)) {
-        HashMap error = null;
+        LinkedTreeMap error = null;
 
         // If we get a hash back, it usually means a problem with authentication.
         // Otherwise, it's an error from deploying the enviornment code.
-        if (result.getResponseBody() instanceof HashMap ) {
-          error = (HashMap) result.getResponseBody();
+        if (result.getResponseBody() instanceof LinkedTreeMap ) {
+          error = (LinkedTreeMap) result.getResponseBody();
         } else {
           ArrayList envResults = (ArrayList) result.getResponseBody();
-          HashMap firstHash = (HashMap) envResults.get(0);
-          error = (HashMap) firstHash.get("error");
+          LinkedTreeMap firstHash = (LinkedTreeMap) envResults.get(0);
+          error = (LinkedTreeMap) firstHash.get("error");
         }
 
         logger.log(Level.SEVERE, error.toString());
@@ -113,7 +114,7 @@ public final class CodeDeployStep extends PuppetEnterpriseStep implements Serial
 
       Iterator itr = responseList.iterator();
       while(itr.hasNext()) {
-        HashMap envResponse = (HashMap) itr.next();
+        LinkedTreeMap envResponse = (LinkedTreeMap) itr.next();
 
         if (envResponse.get("status").equals("failed")) {
           return false;
@@ -121,8 +122,8 @@ public final class CodeDeployStep extends PuppetEnterpriseStep implements Serial
       }
     }
 
-    if (responseBody instanceof HashMap) {
-      HashMap responseHash = (HashMap) responseBody;
+    if (responseBody instanceof LinkedTreeMap) {
+      LinkedTreeMap responseHash = (LinkedTreeMap) responseBody;
 
       if (responseHash.get("error") != null) {
         return false;

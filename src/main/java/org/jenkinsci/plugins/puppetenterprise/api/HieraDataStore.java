@@ -6,7 +6,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import hudson.model.RootAction;
 import hudson.Extension;
-import org.json.*;
+import com.google.gson.Gson;
 import javax.servlet.ServletException;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
@@ -132,6 +132,6 @@ public class HieraDataStore implements RootAction {
       hash.put(key, valueHash);
     }
 
-    return new JSONObject(hash).toString();
+    return new Gson().toJson(hash);
   }
 }
