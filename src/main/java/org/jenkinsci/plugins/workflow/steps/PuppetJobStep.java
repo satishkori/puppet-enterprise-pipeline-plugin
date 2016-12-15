@@ -165,7 +165,6 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
       if (!step.isSuccessful(result)) {
         String error = null;
 
-        //RBAC will return an error key on error
         if (responseHash.get("error") != null) {
           if (responseHash.get("error") instanceof LinkedTreeMap) {
             LinkedTreeMap errorHash = (LinkedTreeMap) responseHash.get("error");
@@ -179,12 +178,17 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
           }
         }
 
+        //The orchestrator returns a msg key on error
+        if (responseHash.get("msg") != null) {
+          error = (String) responseHash.get("msg");
+        }
+
+        //The orchestrator return 404 on environment not found
         if (result.getResponseCode() == 404 && error == null) {
           error = "Environment " + step.getEnvironment() + " not found";
         }
 
-        logger.log(Level.SEVERE, error);
-        throw new PEException(error, result.getResponseCode());
+        throw new PEException(error, result.getResponseCode(), listener);
       }
 
       LinkedTreeMap job = new LinkedTreeMap();
@@ -240,16 +244,77 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
         }
       } while (!jobStatus.equals("finished") && !jobStatus.equals("stopped") && !jobStatus.equals("failed"));
 
+      PEResponse nodes_response = step.request("/orchestrator/v1/jobs/" + parseJobId(jobID) + "/nodes", 8143, "GET", null);
+      jobStatusResponseHash.put("nodes", nodes_response.getResponseBody());
+      jobStatusResponseHash.put("status", jobStatus);
+
       if (jobStatus.equals("failed") || jobStatus.equals("stopped")) {
-        throw new PEException("Job " + parseJobId(jobID) + " " + jobStatus, listener);
-      } else {
-        listener.getLogger().println("Successfully ran Puppet job " + parseJobId(jobID));
+        String message = "Puppet job " + parseJobId(jobID) + " " + jobStatus + "\n---------\n" + step.formatReport(jobStatusResponseHash);
+        throw new PEException(message, listener);
       }
+
+      String message = "Successfully ran Puppet job " + parseJobId(jobID) + "\n---------\n" + step.formatReport(jobStatusResponseHash);
+      listener.getLogger().println(message);
 
       return null;
     }
 
     private static final long serialVersionUID = 1L;
+  }
+
+  public String formatReport(LinkedTreeMap report) {
+    StringBuilder formattedReport = new StringBuilder();
+
+    Integer node_count = ((Double) report.get("node_count")).intValue();
+    String environment = (String) ((LinkedTreeMap) report.get("environment")).get("name");
+
+    formattedReport.append("Puppet Job Name: " + (String) report.get("name") + "\n");
+    formattedReport.append("Status: " + (String) report.get("status") + "\n");
+    formattedReport.append("Environment: " + environment + "\n");
+    formattedReport.append("Nodes: " + node_count.toString() + "\n\n");
+
+    ArrayList<LinkedTreeMap> nodes = (ArrayList) ((LinkedTreeMap) report.get("nodes")).get("items");
+    for (LinkedTreeMap node : nodes ) {
+      formattedReport.append(node.get("name") + "\n");
+
+      LinkedTreeMap node_details = (LinkedTreeMap) node.get("details");
+
+      if (node_details.get("metrics") != null) {
+        LinkedTreeMap metrics = (LinkedTreeMap) node_details.get("metrics");
+        Integer failed  = ((Double) metrics.get("failed")).intValue();
+        Integer changed = ((Double) metrics.get("changed")).intValue();
+        Integer skipped = ((Double) metrics.get("skipped")).intValue();
+        Integer corrective = null;
+
+        if (metrics.get("corrective_change") != null) {
+          corrective = ((Double) metrics.get("corrective_change")).intValue();
+        }
+
+        formattedReport.append("  Resource Events: ");
+        formattedReport.append(failed.toString() + " failed   ");
+        formattedReport.append(changed.toString() + " changed   ");
+
+        //PE versions prior to 2016.4 do not include corrective changes
+        if (corrective != null) {
+          formattedReport.append(corrective.toString() + " corrective   ");
+        }
+
+        formattedReport.append(skipped.toString() + " skipped    ");
+        formattedReport.append("\n");
+
+        formattedReport.append("  Report URL: " + node_details.get("report-url") + "\n");
+        formattedReport.append("\n");
+
+      }
+
+      //If the node could not be run, we get a message key back instead of a metrics key
+      if (node_details.get("message") != null) {
+        formattedReport.append(node_details.get("message"));
+      }
+
+    }
+
+    return formattedReport.toString();
   }
 
   public Boolean isSuccessful(PEResponse response) {

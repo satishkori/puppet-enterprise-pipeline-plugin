@@ -1,0 +1,11 @@
+{
+  "items" : [ {
+    "name" : "doesnotexist",
+    "transaction_uuid" : null,
+    "state" : "errored",
+    "timestamp" : "2016-12-15T18:20:29Z",
+    "details" : {
+      "message" : "Error running puppet on doesnotexist: doesnotexist is not connected to the PCP broker"
+    }
+  } ]
+}

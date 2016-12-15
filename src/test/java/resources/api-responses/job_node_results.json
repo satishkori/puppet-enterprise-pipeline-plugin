@@ -1,0 +1,223 @@
+{
+  "items" : [ {
+    "name" : "database-production.pdx.puppet.vm",
+    "transaction_uuid" : "9ffbbbfe-0337-4610-a9d7-e17c11813cdd",
+    "state" : "finished",
+    "timestamp" : "2016-12-15T07:42:02Z",
+    "details" : {
+      "metrics" : {
+        "corrective_change" : 0,
+        "out_of_sync" : 0,
+        "restarted" : 0,
+        "skipped" : 0,
+        "total" : 208,
+        "changed" : 0,
+        "scheduled" : 0,
+        "failed_to_restart" : 0,
+        "failed" : 0
+      },
+      "report-url" : "https://master.inf.puppet.vm/#/cm/report/c01241a705186428975ef9cb731e4b3ecf3cb428",
+      "hash" : "c01241a705186428975ef9cb731e4b3ecf3cb428",
+      "environment" : "production",
+      "message" : "Finished puppet run on database-production.pdx.puppet.vm - Success! "
+    }
+  }, {
+    "name" : "master.inf.puppet.vm",
+    "transaction_uuid" : "65b44f20-0f40-424f-8d64-63fdd9222056",
+    "state" : "finished",
+    "timestamp" : "2016-12-15T07:42:19Z",
+    "details" : {
+      "metrics" : {
+        "corrective_change" : 0,
+        "out_of_sync" : 0,
+        "restarted" : 0,
+        "skipped" : 0,
+        "total" : 845,
+        "changed" : 0,
+        "scheduled" : 0,
+        "failed_to_restart" : 0,
+        "failed" : 0
+      },
+      "report-url" : "https://master.inf.puppet.vm/#/cm/report/4a94d124151db7f06036d947d50774f520283dd4",
+      "hash" : "4a94d124151db7f06036d947d50774f520283dd4",
+      "environment" : "production",
+      "message" : "Finished puppet run on master.inf.puppet.vm - Success! "
+    }
+  }, {
+    "name" : "rgbank.pdx.puppet.vm",
+    "transaction_uuid" : "966a8783-7833-4c94-8c1c-7f6c6f554e4f",
+    "state" : "finished",
+    "timestamp" : "2016-12-15T07:42:04Z",
+    "details" : {
+      "metrics" : {
+        "corrective_change" : 0,
+        "out_of_sync" : 0,
+        "restarted" : 0,
+        "skipped" : 0,
+        "total" : 196,
+        "changed" : 0,
+        "scheduled" : 0,
+        "failed_to_restart" : 0,
+        "failed" : 0
+      },
+      "report-url" : "https://master.inf.puppet.vm/#/cm/report/e6c3aa14ce2289d41e2fe497bfb068e0d0d5f042",
+      "hash" : "e6c3aa14ce2289d41e2fe497bfb068e0d0d5f042",
+      "environment" : "production",
+      "message" : "Finished puppet run on rgbank.pdx.puppet.vm - Success! "
+    }
+  }, {
+    "name" : "jenkins.inf.puppet.vm",
+    "transaction_uuid" : "af6a367d-b733-41df-ac93-7509b654fa74",
+    "state" : "finished",
+    "timestamp" : "2016-12-15T07:42:04Z",
+    "details" : {
+      "metrics" : {
+        "corrective_change" : 0,
+        "out_of_sync" : 0,
+        "restarted" : 0,
+        "skipped" : 0,
+        "total" : 295,
+        "changed" : 0,
+        "scheduled" : 0,
+        "failed_to_restart" : 0,
+        "failed" : 0
+      },
+      "report-url" : "https://master.inf.puppet.vm/#/cm/report/24c21e3e91313a3004c0493f51dc2870e0a5ddd5",
+      "hash" : "24c21e3e91313a3004c0493f51dc2870e0a5ddd5",
+      "environment" : "production",
+      "message" : "Finished puppet run on jenkins.inf.puppet.vm - Success! "
+    }
+  }, {
+    "name" : "database-staging.pdx.puppet.vm",
+    "transaction_uuid" : "10c4ac6f-d763-46c8-bf36-86441e01f13d",
+    "state" : "finished",
+    "timestamp" : "2016-12-15T07:42:04Z",
+    "details" : {
+      "metrics" : {
+        "corrective_change" : 0,
+        "out_of_sync" : 0,
+        "restarted" : 0,
+        "skipped" : 0,
+        "total" : 208,
+        "changed" : 0,
+        "scheduled" : 0,
+        "failed_to_restart" : 0,
+        "failed" : 0
+      },
+      "report-url" : "https://master.inf.puppet.vm/#/cm/report/f6e58d210b1d63103e46be645e73f03c9733ecfc",
+      "hash" : "f6e58d210b1d63103e46be645e73f03c9733ecfc",
+      "environment" : "production",
+      "message" : "Finished puppet run on database-staging.pdx.puppet.vm - Success! "
+    }
+  }, {
+    "name" : "rgbank-staging.pdx.puppet.vm",
+    "transaction_uuid" : "5094da26-ae15-449c-96ea-c3350c597270",
+    "state" : "finished",
+    "timestamp" : "2016-12-15T07:42:22Z",
+    "details" : {
+      "metrics" : {
+        "corrective_change" : 0,
+        "out_of_sync" : 0,
+        "restarted" : 0,
+        "skipped" : 0,
+        "total" : 196,
+        "changed" : 0,
+        "scheduled" : 0,
+        "failed_to_restart" : 0,
+        "failed" : 0
+      },
+      "report-url" : "https://master.inf.puppet.vm/#/cm/report/8e02667d032ed95d8180c9b7f8d79552953f556b",
+      "hash" : "8e02667d032ed95d8180c9b7f8d79552953f556b",
+      "environment" : "production",
+      "message" : "Finished puppet run on rgbank-staging.pdx.puppet.vm - Success! "
+    }
+  }, {
+    "name" : "rgbank-appserver-01.pdx.puppet.vm",
+    "transaction_uuid" : "e52acd79-11fc-4248-8352-5ec59c2adc4b",
+    "state" : "finished",
+    "timestamp" : "2016-12-15T07:42:03Z",
+    "details" : {
+      "metrics" : {
+        "corrective_change" : 0,
+        "out_of_sync" : 0,
+        "restarted" : 0,
+        "skipped" : 0,
+        "total" : 233,
+        "changed" : 0,
+        "scheduled" : 0,
+        "failed_to_restart" : 0,
+        "failed" : 0
+      },
+      "report-url" : "https://master.inf.puppet.vm/#/cm/report/74809e2c6e1be237e936f6ca74f9d19ca7f8e9df",
+      "hash" : "74809e2c6e1be237e936f6ca74f9d19ca7f8e9df",
+      "environment" : "production",
+      "message" : "Finished puppet run on rgbank-appserver-01.pdx.puppet.vm - Success! "
+    }
+  }, {
+    "name" : "rgbank-dev.pdx.puppet.vm",
+    "transaction_uuid" : "dccbab20-16e3-49d0-97fe-d487fb876184",
+    "state" : "finished",
+    "timestamp" : "2016-12-15T07:42:02Z",
+    "details" : {
+      "metrics" : {
+        "corrective_change" : 0,
+        "out_of_sync" : 0,
+        "restarted" : 0,
+        "skipped" : 0,
+        "total" : 233,
+        "changed" : 0,
+        "scheduled" : 0,
+        "failed_to_restart" : 0,
+        "failed" : 0
+      },
+      "report-url" : "https://master.inf.puppet.vm/#/cm/report/b7e248bf062a9511f14bce55a4a29d7025f41030",
+      "hash" : "b7e248bf062a9511f14bce55a4a29d7025f41030",
+      "environment" : "production",
+      "message" : "Finished puppet run on rgbank-dev.pdx.puppet.vm - Success! "
+    }
+  }, {
+    "name" : "gitlab.inf.puppet.vm",
+    "transaction_uuid" : "6bbe5b3e-5311-4951-a681-5d2f58c5b7bb",
+    "state" : "finished",
+    "timestamp" : "2016-12-15T07:42:22Z",
+    "details" : {
+      "metrics" : {
+        "corrective_change" : 0,
+        "out_of_sync" : 0,
+        "restarted" : 0,
+        "skipped" : 0,
+        "total" : 172,
+        "changed" : 0,
+        "scheduled" : 0,
+        "failed_to_restart" : 0,
+        "failed" : 0
+      },
+      "report-url" : "https://master.inf.puppet.vm/#/cm/report/55ef6b21cea4b844e3f539b6c4f3a720dd7df072",
+      "hash" : "55ef6b21cea4b844e3f539b6c4f3a720dd7df072",
+      "environment" : "production",
+      "message" : "Finished puppet run on gitlab.inf.puppet.vm - Success! "
+    }
+  }, {
+    "name" : "rgbank-appserver-staging-01.pdx.puppet.vm",
+    "transaction_uuid" : "9a031239-8f71-436f-a72c-300a1e8025a9",
+    "state" : "finished",
+    "timestamp" : "2016-12-15T07:42:03Z",
+    "details" : {
+      "metrics" : {
+        "corrective_change" : 0,
+        "out_of_sync" : 0,
+        "restarted" : 0,
+        "skipped" : 0,
+        "total" : 233,
+        "changed" : 0,
+        "scheduled" : 0,
+        "failed_to_restart" : 0,
+        "failed" : 0
+      },
+      "report-url" : "https://master.inf.puppet.vm/#/cm/report/921599ed4f8b84a1e5a5f77254e54b1de6cfca37",
+      "hash" : "921599ed4f8b84a1e5a5f77254e54b1de6cfca37",
+      "environment" : "production",
+      "message" : "Finished puppet run on rgbank-appserver-staging-01.pdx.puppet.vm - Success! "
+    }
+  } ]
+}
