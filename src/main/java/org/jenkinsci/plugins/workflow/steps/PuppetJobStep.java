@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.workflow.steps;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.*;
 import com.google.inject.Inject;
 import hudson.Extension;
@@ -125,6 +127,10 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
     @StepContextParameter private transient Run<?, ?> run;
     @StepContextParameter private transient TaskListener listener;
 
+    @SuppressFBWarnings(
+      value = "DLS_DEAD_LOCAL_STORE",
+      justification = "Findbugs is wrong. The variable is not a dead store."
+    )
     @Override protected Void run() throws Exception {
       LinkedTreeMap scope = new LinkedTreeMap();
       LinkedTreeMap body = new LinkedTreeMap();
