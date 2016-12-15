@@ -185,6 +185,57 @@ public class PuppetJobStepTest extends Assert {
   }
 
   @Test
+  public void puppetJobNonExistantNodeFails() throws Exception {
+    mockOrchestratorService.stubFor(post(urlEqualTo("/orchestrator/v1/command/deploy"))
+        .withHeader("content-type", equalTo("application/json"))
+        .withHeader("X-Authentication", equalTo("super_secret_token_string"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(getCommandDeployResponseString())));
+
+    mockOrchestratorService.stubFor(get(urlEqualTo("/orchestrator/v1/jobs/711"))
+        .withHeader("X-Authentication", equalTo("super_secret_token_string"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "job_node_does_not_exist.json"))));
+
+    mockOrchestratorService.stubFor(get(urlEqualTo("/orchestrator/v1/jobs/711/nodes"))
+        .withHeader("X-Authentication", equalTo("super_secret_token_string"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "nodes_does_not_exist.json"))));
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+        //Create a job where the credentials are defined as part of the job method call
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Using List of Nodes Where Node Does Not Exist Fails");
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.credentials 'pe-test-token' \n" +
+          "  puppet.job 'production', nodes: ['doesnotexist'] \n" +
+          "}", true));
+        WorkflowRun result = job.scheduleBuild2(0).get();
+        story.j.assertBuildStatus(Result.FAILURE, result);
+
+        verify(postRequestedFor(urlMatching("/orchestrator/v1/command/deploy"))
+            .withRequestBody(equalToJson("{\"environment\": \"production\", \"noop\" : false}"))
+            .withHeader("X-Authentication", matching("super_secret_token_string"))
+            .withHeader("Content-Type", matching("application/json")));
+
+        verify(getRequestedFor(urlMatching("/orchestrator/v1/jobs/711"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+
+        verify(getRequestedFor(urlMatching("/orchestrator/v1/jobs/711/nodes"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+      }
+    });
+  }
+
+  @Test
   public void puppetJobFailsOnNoSuchEnvironment() throws Exception {
 
     mockOrchestratorService.stubFor(post(urlEqualTo("/orchestrator/v1/command/deploy"))

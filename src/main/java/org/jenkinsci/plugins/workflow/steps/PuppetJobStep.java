@@ -166,8 +166,8 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
         String error = null;
 
         if (responseHash.get("error") != null) {
-          if (responseHash.get("error") instanceof HashMap) {
-            HashMap errorHash = (HashMap) responseHash.get("error");
+          if (responseHash.get("error") instanceof LinkedTreeMap) {
+            LinkedTreeMap errorHash = (LinkedTreeMap) responseHash.get("error");
             error = errorHash.toString();
           } else if (responseHash.get("error") instanceof String) {
             String errorString = (String) responseHash.get("error");
@@ -250,7 +250,6 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
 
       if (jobStatus.equals("failed") || jobStatus.equals("stopped")) {
         String message = "Puppet job " + parseJobId(jobID) + " " + jobStatus + "\n---------\n" + step.formatReport(jobStatusResponseHash);
-        listener.getLogger().println(message);
         throw new PEException(message, listener);
       }
 
@@ -279,30 +278,40 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
       formattedReport.append(node.get("name") + "\n");
 
       LinkedTreeMap node_details = (LinkedTreeMap) node.get("details");
-      LinkedTreeMap metrics = (LinkedTreeMap) node_details.get("metrics");
-      Integer failed  = ((Double) metrics.get("failed")).intValue();
-      Integer changed = ((Double) metrics.get("changed")).intValue();
-      Integer skipped = ((Double) metrics.get("skipped")).intValue();
-      Integer corrective = null;
 
-      if (metrics.get("corrective_change") != null) {
-        corrective = ((Double) metrics.get("corrective_change")).intValue();
+      if (node_details.get("metrics") != null) {
+        LinkedTreeMap metrics = (LinkedTreeMap) node_details.get("metrics");
+        Integer failed  = ((Double) metrics.get("failed")).intValue();
+        Integer changed = ((Double) metrics.get("changed")).intValue();
+        Integer skipped = ((Double) metrics.get("skipped")).intValue();
+        Integer corrective = null;
+
+        if (metrics.get("corrective_change") != null) {
+          corrective = ((Double) metrics.get("corrective_change")).intValue();
+        }
+
+        formattedReport.append("  Resource Events: ");
+        formattedReport.append(failed.toString() + " failed   ");
+        formattedReport.append(changed.toString() + " changed   ");
+
+        //PE versions prior to 2016.4 do not include corrective changes
+        if (corrective != null) {
+          formattedReport.append(corrective.toString() + " corrective   ");
+        }
+
+        formattedReport.append(skipped.toString() + " skipped    ");
+        formattedReport.append("\n");
+
+        formattedReport.append("  Report URL: " + node_details.get("report-url") + "\n");
+        formattedReport.append("\n");
+
       }
 
-      formattedReport.append("  Resource Events: ");
-      formattedReport.append(failed.toString() + " failed   ");
-      formattedReport.append(changed.toString() + " changed   ");
-
-      //PE versions prior to 2016.4 do not include corrective changes
-      if (corrective != null) {
-        formattedReport.append(corrective.toString() + " corrective   ");
+      //If the node could not be run, we get a message key back instead of a metrics key
+      if (node_details.get("message") != null) {
+        formattedReport.append(node_details.get("message"));
       }
 
-      formattedReport.append(skipped.toString() + " skipped    ");
-      formattedReport.append("\n");
-
-      formattedReport.append("  Report URL: " + node_details.get("report-url") + "\n");
-      formattedReport.append("\n");
     }
 
     return formattedReport.toString();
