@@ -94,6 +94,10 @@ public class PuppetJobStepTest extends Assert {
     return TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "job_deploy.json");
   }
 
+  private String getJobNodeResults() {
+    return TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "job_node_results.json");
+  }
+
   private void stubJobDeploySuccessful() {
     mockOrchestratorService.stubFor(post(urlEqualTo("/orchestrator/v1/command/deploy"))
         .withHeader("content-type", equalTo("application/json"))
@@ -109,6 +113,13 @@ public class PuppetJobStepTest extends Assert {
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
             .withBody(getJobDetailsString())));
+
+    mockOrchestratorService.stubFor(get(urlEqualTo("/orchestrator/v1/jobs/711/nodes"))
+        .withHeader("X-Authentication", equalTo("super_secret_token_string"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(getJobNodeResults())));
   }
 
   @Test
@@ -136,8 +147,11 @@ public class PuppetJobStepTest extends Assert {
 
         verify(getRequestedFor(urlMatching("/orchestrator/v1/jobs/711"))
             .withHeader("X-Authentication", matching("super_secret_token_string")));
+
+        verify(getRequestedFor(urlMatching("/orchestrator/v1/jobs/711/nodes"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
       }
-    });
+      });
   }
 
   @Test
@@ -162,6 +176,9 @@ public class PuppetJobStepTest extends Assert {
             .withHeader("Content-Type", matching("application/json")));
 
         verify(getRequestedFor(urlMatching("/orchestrator/v1/jobs/711"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+
+        verify(getRequestedFor(urlMatching("/orchestrator/v1/jobs/711/nodes"))
             .withHeader("X-Authentication", matching("super_secret_token_string")));
       }
     });

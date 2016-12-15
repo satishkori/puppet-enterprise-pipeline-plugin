@@ -178,15 +178,17 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
           }
         }
 
+        //The orchestrator returns a msg key on error
         if (responseHash.get("msg") != null) {
           error = (String) responseHash.get("msg");
         }
 
+        //The orchestrator return 404 on environment not found
         if (result.getResponseCode() == 404 && error == null) {
           error = "Environment " + step.getEnvironment() + " not found";
         }
 
-        throw new PEException(error, result.getResponseCode());
+        throw new PEException(error, result.getResponseCode(), listener);
       }
 
       LinkedTreeMap job = new LinkedTreeMap();
@@ -243,7 +245,7 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
       } while (!jobStatus.equals("finished") && !jobStatus.equals("stopped") && !jobStatus.equals("failed"));
 
       PEResponse nodes_response = step.request("/orchestrator/v1/jobs/" + parseJobId(jobID) + "/nodes", 8143, "GET", null);
-      jobStatusResponseHash.put("nodes", (HashMap) nodes_response.getResponseBody());
+      jobStatusResponseHash.put("nodes", nodes_response.getResponseBody());
       jobStatusResponseHash.put("status", jobStatus);
 
       if (jobStatus.equals("failed") || jobStatus.equals("stopped")) {
@@ -261,42 +263,45 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
     private static final long serialVersionUID = 1L;
   }
 
-  public String formatReport(HashMap report) {
+  public String formatReport(LinkedTreeMap report) {
     StringBuilder formattedReport = new StringBuilder();
 
-    formattedReport.append("Puppet Job Name: " + ((String) report.get("name")) + "\n");
-    formattedReport.append("Status: " + ((String) report.get("status")) + "\n");
-    formattedReport.append("Environment: " + ((String)((HashMap) report.get("environment")).get("name")) + "\n");
-    formattedReport.append("Nodes: " + (String) report.get("node_count") + "\n\n");
+    Integer node_count = ((Double) report.get("node_count")).intValue();
+    String environment = (String) ((LinkedTreeMap) report.get("environment")).get("name");
 
-    ArrayList<HashMap> nodes = (ArrayList) ((HashMap) report.get("nodes")).get("items");
-    for (HashMap node : nodes ) {
-      formattedReport.append((String) node.get("name") + "\n");
+    formattedReport.append("Puppet Job Name: " + (String) report.get("name") + "\n");
+    formattedReport.append("Status: " + (String) report.get("status") + "\n");
+    formattedReport.append("Environment: " + environment + "\n");
+    formattedReport.append("Nodes: " + node_count.toString() + "\n\n");
 
-      HashMap node_details = (HashMap) node.get("details");
-      HashMap metrics = (HashMap) node_details.get("metrics");
-      String failed = (String) metrics.get("failed");
-      String changed = (String) metrics.get("changed");
-      String skipped = (String) metrics.get("skipped");
-      String corrective = null;
+    ArrayList<LinkedTreeMap> nodes = (ArrayList) ((LinkedTreeMap) report.get("nodes")).get("items");
+    for (LinkedTreeMap node : nodes ) {
+      formattedReport.append(node.get("name") + "\n");
+
+      LinkedTreeMap node_details = (LinkedTreeMap) node.get("details");
+      LinkedTreeMap metrics = (LinkedTreeMap) node_details.get("metrics");
+      Integer failed  = ((Double) metrics.get("failed")).intValue();
+      Integer changed = ((Double) metrics.get("changed")).intValue();
+      Integer skipped = ((Double) metrics.get("skipped")).intValue();
+      Integer corrective = null;
 
       if (metrics.get("corrective_change") != null) {
-        corrective = (String) metrics.get("corrective_change");
+        corrective = ((Double) metrics.get("corrective_change")).intValue();
       }
 
       formattedReport.append("  Resource Events: ");
-      formattedReport.append(failed + " failed   ");
-      formattedReport.append(changed + " changed   ");
+      formattedReport.append(failed.toString() + " failed   ");
+      formattedReport.append(changed.toString() + " changed   ");
 
       //PE versions prior to 2016.4 do not include corrective changes
       if (corrective != null) {
-        formattedReport.append(corrective + " corrective   ");
+        formattedReport.append(corrective.toString() + " corrective   ");
       }
 
-      formattedReport.append(skipped + " skipped    ");
+      formattedReport.append(skipped.toString() + " skipped    ");
       formattedReport.append("\n");
 
-      formattedReport.append("  Report URL: " + (String) node_details.get("report-url") + "\n");
+      formattedReport.append("  Report URL: " + node_details.get("report-url") + "\n");
       formattedReport.append("\n");
     }
 

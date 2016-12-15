@@ -80,7 +80,6 @@ public class HieraStepTest extends Assert {
       HttpResponse response = httpClient.execute(httpGet, localContext);
 
       String json = IOUtils.toString(response.getEntity().getContent());
-      System.out.println("RETURNED BODY WAS: " + json);
       if (response.getStatusLine().getStatusCode() != 404 && !json.isEmpty()) {
         Object responseBody = new Gson().fromJson(json, Object.class);
         responseHash = (LinkedTreeMap) responseBody;
