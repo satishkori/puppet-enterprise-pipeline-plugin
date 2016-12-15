@@ -16,7 +16,10 @@ import java.security.cert.X509Certificate;
 import java.security.*;
 import javax.net.ssl.*;
 import java.net.*;
+import java.lang.reflect.Type;
 import com.google.inject.Inject;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.internal.LinkedTreeMap;
 
 import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
@@ -41,9 +44,8 @@ import hudson.Extension;
 import hudson.model.TaskListener;
 import hudson.security.ACL;
 import java.io.Serializable;
-import org.json.*;
-import com.json.parsers.*;
-import com.json.exceptions.JSONParsingException;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
@@ -55,7 +57,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.json.*;
 import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.*;
@@ -157,7 +158,7 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
   }
 
   public final PEResponse request(String endpoint, Integer port, String method, Map body) throws Exception {
-    JSONObject jsonBody = new JSONObject(body);
+    Gson gson = new Gson();
     String responseString = "";
     Object responseBody = null;
     String accessToken = getToken();
@@ -186,7 +187,7 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
         if (body != null) {
           request.addHeader("content-type", "application/json");
           request.addHeader("X-Authentication", accessToken);
-          StringEntity requestJson = new StringEntity(jsonBody.toString());
+          StringEntity requestJson = new StringEntity(gson.toJson(body));
           request.setEntity(requestJson);
         }
         response = httpClient.execute(request);
@@ -199,26 +200,14 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
       }
 
       String json = IOUtils.toString(response.getEntity().getContent());
-      JsonParserFactory factory = JsonParserFactory.getInstance();
-      JSONParser parser = factory.newJsonParser();
       Integer responseCode = response.getStatusLine().getStatusCode();
 
       try {
-        responseBody = parser.parseJson(json);
-
-        //Sometimes there's a root key in the has and I don't know why.
-        // It might only happen when the JSON is an array
-        if (responseBody instanceof HashMap) {
-          HashMap responseBodyHash = (HashMap) responseBody;
-          if (responseBodyHash.get("root") != null) {
-            responseBody = responseBodyHash.get("root");
-          }
-        }
-
-      } catch(JSONParsingException e) {
+        responseBody = gson.fromJson(json, Object.class);
+      } catch(JsonSyntaxException e) {
         logger.log(Level.SEVERE, e.getMessage());
 
-        HashMap errorContent = new HashMap();
+        LinkedTreeMap errorContent = new LinkedTreeMap();
         errorContent.put("error", json);
         return new PEResponse(errorContent, responseCode);
       }

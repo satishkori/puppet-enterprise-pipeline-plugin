@@ -38,6 +38,7 @@ import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import com.google.gson.internal.LinkedTreeMap;
 
 import org.jenkinsci.plugins.puppetenterprise.PuppetEnterpriseManagement;
 import org.jenkinsci.plugins.puppetenterprise.models.PEResponse;
@@ -125,8 +126,8 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
     @StepContextParameter private transient TaskListener listener;
 
     @Override protected Void run() throws Exception {
-      HashMap scope = new HashMap();
-      HashMap body = new HashMap();
+      LinkedTreeMap scope = new LinkedTreeMap();
+      LinkedTreeMap body = new LinkedTreeMap();
 
       // Target is still supported to support older versions of PE.
       // 2016.4 installs of PE should use the scope parameter when
@@ -159,20 +160,23 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
       body.put("environment", step.getEnvironment());
 
       PEResponse result = step.request("/orchestrator/v1/command/deploy", 8143, "POST", body);
-      HashMap responseHash = (HashMap) result.getResponseBody();
+      LinkedTreeMap responseHash = (LinkedTreeMap) result.getResponseBody();
 
       if (!step.isSuccessful(result)) {
         String error = null;
 
-        if (responseHash.get("error") instanceof HashMap) {
-          HashMap errorHash = (HashMap) responseHash.get("error");
-          error = errorHash.toString();
-        } else if (responseHash.get("error") instanceof String) {
-          String errorString = (String) responseHash.get("error");
-          error = errorString;
-        } else if (responseHash.get("error") instanceof ArrayList) {
-          ArrayList errorArray = (ArrayList) responseHash.get("error");
-          error = errorArray.toString();
+        //RBAC will return an error key on error
+        if (responseHash.get("error") != null) {
+          if (responseHash.get("error") instanceof LinkedTreeMap) {
+            LinkedTreeMap errorHash = (LinkedTreeMap) responseHash.get("error");
+            error = errorHash.toString();
+          } else if (responseHash.get("error") instanceof String) {
+            String errorString = (String) responseHash.get("error");
+            error = errorString;
+          } else if (responseHash.get("error") instanceof ArrayList) {
+            ArrayList errorArray = (ArrayList) responseHash.get("error");
+            error = errorArray.toString();
+          }
         }
 
         if (result.getResponseCode() == 404 && error == null) {
@@ -183,12 +187,13 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
         throw new PEException(error, result.getResponseCode());
       }
 
-      HashMap job = new HashMap();
+      LinkedTreeMap job = new LinkedTreeMap();
       String jobID = "";
       String jobStatus = "";
+      LinkedTreeMap jobStatusResponseHash = new LinkedTreeMap();
 
       try {
-        job = (HashMap) responseHash.get("job");
+        job = (LinkedTreeMap) responseHash.get("job");
         jobID = (String) job.get("id");
         jobStatus = "";
 
@@ -216,15 +221,14 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
         }
 
         PEResponse jobStatusResponse = step.request(peRequestPath, peRequestPort, "GET", null);
-        HashMap jobStatusResponseHash = (HashMap) jobStatusResponse.getResponseBody();
+        jobStatusResponseHash = (LinkedTreeMap) jobStatusResponse.getResponseBody();
 
         if (!step.isSuccessful(jobStatusResponse)) {
-          listener.getLogger().println("Successfully created Puppet job " + parseJobId(jobID));
           throw new PEException(jobStatusResponseHash.toString(), jobStatusResponse.getResponseCode());
         }
 
         ArrayList statuses = (ArrayList) jobStatusResponseHash.get("status");
-        HashMap latestStatus = (HashMap) statuses.get(statuses.size() - 1);
+        LinkedTreeMap latestStatus = (LinkedTreeMap) statuses.get(statuses.size() - 1);
         String currentState = (String) latestStatus.get("state");
         jobStatus = currentState;
 
@@ -256,8 +260,8 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
       return false;
     }
 
-    if (responseBody instanceof HashMap) {
-      HashMap responseHash = (HashMap) responseBody;
+    if (responseBody instanceof LinkedTreeMap) {
+      LinkedTreeMap responseHash = (LinkedTreeMap) responseBody;
 
       if (responseHash.get("error") != null) {
         return false;

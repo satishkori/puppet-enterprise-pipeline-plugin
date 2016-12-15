@@ -38,6 +38,7 @@ import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import com.google.gson.internal.LinkedTreeMap;
 
 import org.jenkinsci.plugins.puppetenterprise.PuppetEnterpriseManagement;
 import org.jenkinsci.plugins.puppetenterprise.models.PEResponse;
@@ -66,7 +67,7 @@ public final class QueryStep extends PuppetEnterpriseStep implements Serializabl
     @StepContextParameter private transient TaskListener listener;
 
     @Override protected ArrayList run() throws Exception {
-      HashMap body = new HashMap();
+      LinkedTreeMap body = new LinkedTreeMap();
       body.put("query", step.getQuery());
 
       PEResponse result = step.request("/pdb/query/v4", 8081, "POST", body);

@@ -129,6 +129,39 @@ public class QueryStepTest extends Assert {
   }
 
   @Test
+  public void queryPuppetDBNEmptyResults() throws Exception {
+
+    mockPuppetDBService.stubFor(post(urlEqualTo("/pdb/query/v4"))
+        .withHeader("content-type", equalTo("application/json"))
+        .withHeader("X-Authentication", equalTo("super_secret_token_string"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody("[]")));
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        //Create a job where the credentials are defined separately
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Successful Query of All Nodes");
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.credentials 'pe-test-token'\n" +
+          "  results = puppet.query 'nodes {}'\n" +
+          "  assert results instanceof ArrayList \n" +
+          "}", true));
+        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+
+        verify(postRequestedFor(urlMatching("/pdb/query/v4"))
+            .withRequestBody(equalToJson("{\"query\": \"nodes {}\"}"))
+            .withHeader("Content-Type", matching("application/json"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+      }
+    });
+  }
+
+  @Test
   public void malformedQueryFails() throws Exception {
 
     mockPuppetDBService.stubFor(post(urlEqualTo("/pdb/query/v4"))

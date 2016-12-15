@@ -6,7 +6,6 @@ import hudson.security.ACL;
 import hudson.XmlFile;
 import hudson.model.Saveable;
 import jenkins.model.Jenkins;
-import org.json.*;
 import java.util.*;
 import java.util.HashMap;
 import java.io.Serializable;
