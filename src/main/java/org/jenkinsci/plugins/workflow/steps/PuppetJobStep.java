@@ -311,11 +311,12 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
         formattedReport.append("  Report URL: " + node_details.get("report-url") + "\n");
         formattedReport.append("\n");
 
-      }
-
-      //If the node could not be run, we get a message key back instead of a metrics key
-      if (node_details.get("message") != null) {
-        formattedReport.append(node_details.get("message"));
+      } else {
+        //There's always a message, but it's only useful if the run was not able to take place,
+        //  which we'll know if there are no metrics.
+        if (node_details.get("message") != null) {
+          formattedReport.append(node_details.get("message"));
+        }
       }
 
     }
