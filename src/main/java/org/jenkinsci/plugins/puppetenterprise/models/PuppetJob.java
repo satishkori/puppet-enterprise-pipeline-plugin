@@ -1,12 +1,20 @@
+package org.jenkinsci.plugins.puppetenterprise.models;
+
 import java.io.*;
-import org.jenkensci.plugins.puppetenterprise.models.PuppetOrchestratorV1.PuppetNodeV1.*;
+import java.util.*;
+import org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.PuppetOrchestratorException;
+import org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.PuppetCommandDeployV1;
+import org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.PuppetJobsIDV1;
+import org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.puppetnodev1.*;
+import org.jenkinsci.plugins.puppetenterprise.models.PERequest;
+import com.google.gson.internal.LinkedTreeMap;
 
 public class PuppetJob {
   private String state = null;
+  private String name = null;
   private String token = null;
-  private ArrayList<PuppetNodeItemV1> nodes = new ArrayList();
+  private ArrayList<PuppetNodeItemV1> nodes = null;
   private Integer nodeCount = null;
-  private PERequest peRequest = null;
   private LinkedTreeMap scope = new LinkedTreeMap();
   private String target = null;
   private String environment = null;
@@ -17,58 +25,51 @@ public class PuppetJob {
   private Boolean noop = false;
   private Boolean evalTrace = false;
 
-  public PuppetJob() {
-    this.peRequest = new PERequest();
-  }
+  public PuppetJob() { }
 
-  public setScope(String application, ArrayList nodes, String query) {
+  public void setScope(String application, ArrayList nodes, String query) {
     this.scope.put("application", application);
-    this.nodes.put("nodes", nodes);
-    this.query.put("query", query);
+    this.scope.put("nodes", nodes);
+    this.scope.put("query", query);
   }
 
-  public setTarget(String target) {
+  public void setTarget(String target) {
     this.target = target;
   }
 
-  public setToken(String token) {
+  public void setToken(String token) {
     this.token = token;
-    peRequest.setToken(this.token);
   }
 
-  public setEnvironment(String environment) {
+  public void setEnvironment(String environment) {
     this.environment = environment;
   }
 
-  public setConcurrency(Integer concurrency) {
+  public void setConcurrency(Integer concurrency) {
     this.concurrency = concurrency;
   }
 
-  public setEnforceEnvironment(Boolean enforcement) {
-    this.enforce_environment = enforcement;
+  public void setEnforceEnvironment(Boolean enforcement) {
+    this.enforceEnvironment = enforcement;
   }
 
-  public setDebug(Boolean debug) {
+  public void setDebug(Boolean debug) {
     this.debug = debug;
   }
 
-  public setTrace(Boolean trace) {
+  public void setTrace(Boolean trace) {
     this.trace = trace;
   }
 
-  public setNoop(Boolean noop) {
+  public void setNoop(Boolean noop) {
     this.noop = noop;
   }
 
-  public setEvalTrace(Boolean evalTrace) {
+  public void setEvalTrace(Boolean evalTrace) {
     this.evalTrace = evalTrace;
   }
 
-  public setTarget(String target) {
-    this.target = target;
-  }
-
-  public PuppetJobResult run(PERequest request) throws PuppetOrchestratorException {
+  public void run() throws PuppetOrchestratorException, Exception {
     start();
 
     do {
@@ -79,27 +80,32 @@ public class PuppetJob {
       }
 
       update();
-    } while isRunning();
+    } while(isRunning());
 
   }
 
-  public void start() throws PuppetOrchestratorException {
+  public void start() throws PuppetOrchestratorException, Exception {
     PuppetCommandDeployV1 deployCommand = new PuppetCommandDeployV1();
 
     if (this.scope.isEmpty() && this.target != null) {
       deployCommand.setTarget(this.target);
     } else {
-      deployCommand.setScope(this.scope);
+      deployCommand.setScope((String) this.scope.get("application"),
+        (ArrayList<PuppetNodeItemV1>) this.scope.get("nodes"),
+        (String) this.scope.get("query"));
     }
 
     deployCommand.setConcurrency(this.concurrency);
     deployCommand.setEnvironment(this.environment);
+    deployCommand.setToken(this.token);
     deployCommand.setEnforceEnvironment(this.enforceEnvironment);
     deployCommand.setDebug(this.debug);
     deployCommand.setTrace(this.trace);
     deployCommand.setNoop(this.noop);
     deployCommand.setEvalTrace(this.evalTrace);
-    deployCommand.execute(peDeployRequest);
+    deployCommand.execute();
+
+    this.name = deployCommand.getName();
   }
 
   public void stop() {
@@ -107,7 +113,7 @@ public class PuppetJob {
   }
 
   public Boolean failed() {
-    return (this.stae == "failed");
+    return (this.state == "failed");
   }
 
   public Boolean stopped() {
@@ -118,14 +124,15 @@ public class PuppetJob {
     return (this.state == "running" || this.state == "new" || this.state == "ready");
   }
 
-  public void update() {
-    PuppetJobsIDV1 job = new PuppetJobsIDV1();
-    job.name = this.name;
-    job.execute(peRequest);
+  public void update() throws PuppetOrchestratorException, Exception {
+    PuppetJobsIDV1 job = new PuppetJobsIDV1(this.name);
+    job.setToken(this.token);
+
+    job.execute();
 
     this.state = job.getState();
     this.nodes = job.getNodes();
-    this.enviroenmtn = job.getEnvironment();
+    this.environment = job.getEnvironment();
     this.nodeCount = job.getNodeCount();
   }
 
@@ -135,10 +142,10 @@ public class PuppetJob {
     formattedReport.append("Puppet Job Name: " + this.name + "\n");
     formattedReport.append("State: " + this.state + "\n");
     formattedReport.append("Environment: " + this.environment + "\n");
-    formattedReport.append("Nodes: " + this.node_count + "\n\n");
+    formattedReport.append("Nodes: " + this.nodeCount + "\n\n");
 
     for (PuppetNodeItemV1 node : this.nodes) {
-      formattedReport.append(node.getName()) + "\n");
+      formattedReport.append(node.getName() + "\n");
 
       if (node.getMetrics() != null) {
         PuppetNodeMetricsV1 metrics = node.getMetrics();
@@ -148,7 +155,7 @@ public class PuppetJob {
         formattedReport.append(metrics.getChanged().toString() + " changed   ");
 
         //PE versions prior to 2016.4 do not include corrective changes
-        if (metrics.get("corrective_change") != null) {
+        if (metrics.getCorrectiveChanged() != null) {
           formattedReport.append(metrics.getCorrectiveChanged().toString() + " corrective   ");
         }
 
