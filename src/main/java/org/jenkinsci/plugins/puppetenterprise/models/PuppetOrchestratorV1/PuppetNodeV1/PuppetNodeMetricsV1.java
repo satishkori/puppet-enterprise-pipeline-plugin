@@ -1,3 +1,5 @@
+package org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.puppetnodev1;
+
 public class PuppetNodeMetricsV1 {
   private Integer total = 0;
   private Integer failed = 0;
