@@ -157,7 +157,6 @@ public abstract class PERequest {
         if (body != null) {
           request.addHeader("content-type", "application/json");
           request.addHeader("X-Authentication", accessToken);
-          System.out.println("Sending JSON: " + gson.toJson(this.body));
           StringEntity requestJson = new StringEntity(gson.toJson(this.body));
           request.setEntity(requestJson);
         }
