@@ -78,14 +78,8 @@ public class PuppetJobsIDV1 extends PuppetOrchestratorV1 {
 
     if (isSuccessful(peResponse)) {
       PuppetJobsIDResponse response = gson.fromJson(peResponse.getJSON(), PuppetJobsIDResponse.class);
-      this.state = response.getLastStatus().state;
 
-      try {
-        this.nodes = getNodes(response.getNodesURL());
-      } catch(URISyntaxException e) {
-        throw new Exception("Puppet Enterprise Orchestrator API Error: Returned job " + this.name + " data contained invalid URL for node URL. Value was " + response.getNodesURL());
-      }
-
+      this.state = response.state;
       this.nodeCount = response.node_count;
     } else {
       PuppetJobsIDError error = gson.fromJson(peResponse.getJSON(), PuppetJobsIDError.class);
@@ -104,6 +98,7 @@ public class PuppetJobsIDV1 extends PuppetOrchestratorV1 {
   class PuppetJobsIDResponse {
     public ArrayList items = new ArrayList();
     public URL id = null;
+    public String state = null;
     public String name = "";
     public PuppetJobsIDResponseOptions options = new PuppetJobsIDResponseOptions();
     public Integer node_count = null;
