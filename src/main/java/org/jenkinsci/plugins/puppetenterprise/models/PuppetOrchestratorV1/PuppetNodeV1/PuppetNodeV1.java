@@ -1,16 +1,19 @@
+package org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.puppetnodev1;
+
 import java.io.*;
-import org.jenkensci.plugins.puppetenterprise.models.PuppetOrchestratorV1.PuppetNodeV1.PuppetNodeMetricsV1;
-import org.jenkensci.plugins.puppetenterprise.models.PuppetOrchestratorV1.PuppetNodeV1.PuppetNodeItemV1;
+import java.util.*;
+import org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.puppetnodev1.PuppetNodeMetricsV1;
+import org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.puppetnodev1.PuppetNodeItemV1;
 
 public class PuppetNodeV1 {
   private String message = null;
   private ArrayList<PuppetNodeItemV1> items = null;
 
-  public getMessage() {
+  public String getMessage() {
     return this.message;
   }
 
-  public getItems() {
+  public ArrayList<PuppetNodeItemV1> getItems() {
     return this.items;
   }
 }
