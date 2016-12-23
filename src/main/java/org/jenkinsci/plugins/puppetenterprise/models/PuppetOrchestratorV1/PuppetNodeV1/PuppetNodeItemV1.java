@@ -1,3 +1,9 @@
+package org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.puppetnodev1;
+
+import com.google.gson.annotations.SerializedName;
+import org.joda.time.DateTime;
+import java.net.*;
+
 public class PuppetNodeItemV1 {
   private DateTime timestamp = new DateTime();
   private String state = "";
@@ -25,21 +31,25 @@ public class PuppetNodeItemV1 {
   public String getMessage() {
     return this.message;
   }
-  
-  public String getReportURL() {
+
+  public URL getReportURL() {
     return details.getReportURL();
   }
 
-  public String getMetrics() {
+  public PuppetNodeMetricsV1 getMetrics() {
     return details.getMetrics();
   }
 
   class PuppetNodeItemDetails {
-    private URL report_url = new URL();
+    //Instruct GSON how to map the "report-url"
+    //  key to a valid Java variable name
+    @SerializedName("report-url")
+    private URL reportUrl = null;
+
     private PuppetNodeMetricsV1 metrics = null;
 
     public URL getReportURL() {
-      return this.report_url;
+      return this.reportUrl;
     }
 
     public PuppetNodeMetricsV1 getMetrics() {
