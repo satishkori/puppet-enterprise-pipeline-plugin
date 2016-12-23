@@ -3,11 +3,12 @@ package org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1;
 import java.io.*;
 import java.util.*;
 import java.net.*;
+import java.lang.reflect.Type;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import org.joda.time.DateTime;
 import org.jenkinsci.plugins.puppetenterprise.models.PEResponse;
 import org.jenkinsci.plugins.puppetenterprise.models.PuppetOrchestratorV1;
 import org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.puppetnodev1.*;
@@ -21,6 +22,7 @@ public class PuppetJobsIDV1 extends PuppetOrchestratorV1 {
   private ArrayList<PuppetNodeItemV1> nodes = new ArrayList();
   private Integer nodeCount = null;
   private String environment = "";
+  Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").create();
 
   public PuppetJobsIDV1() {
     this.response = new PuppetJobsIDResponse();
@@ -55,14 +57,13 @@ public class PuppetJobsIDV1 extends PuppetOrchestratorV1 {
     URI uri = url.toURI();
     PEResponse peResponse = send(url.toURI());
     ArrayList<PuppetNodeItemV1> nodes = null;
-    Gson gson = new Gson();
 
-    // if (isSuccessful(peResponse)) {
-    //   nodes = gson.fromJson(peResponse.getJSON(), (ArrayList<PuppetNodeItemV1>).class);
-    // } else {
-    //   PuppetJobsIDError error = gson.fromJson(peResponse.getJSON(), PuppetJobsIDError.class);
-    //   throw new PuppetOrchestratorException(error.kind, error.msg, error.details);
-    // }
+    if (isSuccessful(peResponse)) {
+      nodes = gson.fromJson(peResponse.getJSON(), PuppetNodeV1.class).getItems();
+    } else {
+      PuppetJobsIDError error = gson.fromJson(peResponse.getJSON(), PuppetJobsIDError.class);
+      throw new PuppetOrchestratorException(error.kind, error.msg, error.details);
+    }
 
     return nodes;
   }
@@ -74,7 +75,6 @@ public class PuppetJobsIDV1 extends PuppetOrchestratorV1 {
   public void execute() throws PuppetOrchestratorException, Exception {
     URI fullURI = getURI(String.format(this.endpoint, this.name));
     PEResponse peResponse = send(fullURI);
-    Gson gson = new Gson();
 
     if (isSuccessful(peResponse)) {
       PuppetJobsIDResponse response = gson.fromJson(peResponse.getJSON(), PuppetJobsIDResponse.class);
@@ -108,7 +108,7 @@ public class PuppetJobsIDV1 extends PuppetOrchestratorV1 {
     public PuppetJobsIDResponseOptions options = new PuppetJobsIDResponseOptions();
     public Integer node_count = null;
     public LinkedTreeMap<String,String> owner = new LinkedTreeMap();
-    public DateTime timestamp = new DateTime();
+    public Date timestamp = null;
     public ArrayList<PuppetJobsIDResponseStatus> status = new ArrayList();
     private LinkedTreeMap<String,String> environment = new LinkedTreeMap();
     private LinkedTreeMap<String,URL> nodes = new LinkedTreeMap();
@@ -128,8 +128,8 @@ public class PuppetJobsIDV1 extends PuppetOrchestratorV1 {
 
     class PuppetJobsIDResponseStatus {
       public String state = "";
-      public DateTime enter_time = new DateTime();
-      public DateTime exit_time = new DateTime();
+      public Date enter_time = null;
+      public Date exit_time = null;
     }
 
     public PuppetJobsIDResponseStatus getLastStatus() {

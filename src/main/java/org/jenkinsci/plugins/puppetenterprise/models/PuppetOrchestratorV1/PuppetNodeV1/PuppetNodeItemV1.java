@@ -1,11 +1,11 @@
 package org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.puppetnodev1;
 
 import com.google.gson.annotations.SerializedName;
-import org.joda.time.DateTime;
 import java.net.*;
+import java.util.Date;
 
 public class PuppetNodeItemV1 {
-  private DateTime timestamp = new DateTime();
+  private Date timestamp = null;
   private String state = "";
   private String transaction_uuid = "";
   private String name = "";
@@ -16,7 +16,7 @@ public class PuppetNodeItemV1 {
     return this.state;
   }
 
-  public DateTime getTimeStamp() {
+  public Date getTimeStamp() {
     return this.timestamp;
   }
 
