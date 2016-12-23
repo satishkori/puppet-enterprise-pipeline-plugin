@@ -55,7 +55,7 @@ class Puppet implements Serializable {
     String application
     String query
     String target = null
-    ArrayList nodes = []
+    ArrayList nodes = null
     Boolean noop = false
     Integer concurrency = null
 
