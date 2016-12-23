@@ -24,6 +24,7 @@ public class PuppetJob {
   private Boolean trace = false;
   private Boolean noop = false;
   private Boolean evalTrace = false;
+  private PuppetJobsIDV1 job = null;
 
   public PuppetJob() { }
 
@@ -82,6 +83,7 @@ public class PuppetJob {
       update();
     } while(isRunning());
 
+    updateNodes();
   }
 
   public void start() throws PuppetOrchestratorException, Exception {
@@ -106,34 +108,37 @@ public class PuppetJob {
     deployCommand.execute();
 
     this.name = deployCommand.getName();
+    this.job = new PuppetJobsIDV1(this.name); //Create the JobID object
   }
 
-  public void stop() {
-
+  public void stop() throws PuppetOrchestratorException, Exception {
+    //TODO: Add ability to stop a running job
+    updateNodes();
   }
 
   public Boolean failed() {
-    return (this.state == "failed");
+    return (this.state.equals("failed"));
   }
 
   public Boolean stopped() {
-    return (this.state == "stopped");
+    return (this.state.equals("stopped"));
   }
 
   public Boolean isRunning() {
-    return (this.state == "running" || this.state == "new" || this.state == "ready");
+    return (!this.state.equals("finished") && !this.state.equals("stopped") && !this.state.equals("failed"));
   }
 
   public void update() throws PuppetOrchestratorException, Exception {
-    PuppetJobsIDV1 job = new PuppetJobsIDV1(this.name);
-    job.setToken(this.token);
+    this.job.setToken(this.token);
+    this.job.execute();
 
-    job.execute();
+    this.state = this.job.getState();
+    this.environment = this.job.getEnvironment();
+    this.nodeCount = this.job.getNodeCount();
+  }
 
-    this.state = job.getState();
-    this.nodes = job.getNodes();
-    this.environment = job.getEnvironment();
-    this.nodeCount = job.getNodeCount();
+  private void updateNodes() throws PuppetOrchestratorException, Exception {
+    this.nodes = this.job.getNodes();
   }
 
   public String formatReport() {
