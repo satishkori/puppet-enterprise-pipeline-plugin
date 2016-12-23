@@ -170,7 +170,6 @@ public abstract class PERequest {
       }
 
       String json = IOUtils.toString(response.getEntity().getContent());
-      System.out.println("RETURNED JSON: " + json);
       Integer responseCode = response.getStatusLine().getStatusCode();
 
       peResponse = new PEResponse(new Object(), responseCode, json);
