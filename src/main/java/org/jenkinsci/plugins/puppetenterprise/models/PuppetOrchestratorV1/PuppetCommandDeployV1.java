@@ -1,76 +1,91 @@
-public class PuppetCommandDeployV1 {
-  private String uri = "/orchestrator/v1/command/deploy";
+package org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1;
+
+import java.util.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.internal.LinkedTreeMap;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import org.jenkinsci.plugins.workflow.PEException;
+import org.jenkinsci.plugins.puppetenterprise.models.PERequest;
+import org.jenkinsci.plugins.puppetenterprise.models.PEResponse;
+import org.jenkinsci.plugins.puppetenterprise.models.PuppetOrchestratorV1;
+import org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.PuppetOrchestratorException;
+
+public class PuppetCommandDeployV1 extends PuppetOrchestratorV1 {
+  private URI uri = null;
   private PuppetCommandDeployRequest  request  = null;
   private PuppetCommandDeployResponse response = null;
 
-  public PuppetCommandDeployV1() {
+  public PuppetCommandDeployV1() throws Exception {
+    this.uri = getURI("/command/deploy");
     this.request = new PuppetCommandDeployRequest();
     this.response = new PuppetCommandDeployResponse();
   }
 
-  public setScope(String application, ArrayList nodes, String query) {
+  public void setScope(String application, ArrayList nodes, String query) {
     this.request.setScope(application, nodes, query);
   }
 
-  public setEnvironment(String environment) {
+  public void setEnvironment(String environment) {
     this.request.environment = environment;
   }
 
-  public setConcurrency(Integer concurrency) {
+  public void setConcurrency(Integer concurrency) {
     this.request.concurrency = concurrency;
   }
 
-  public setEnforceEnvironment(Boolean enforcement) {
+  public void setEnforceEnvironment(Boolean enforcement) {
     this.request.enforce_environment = enforcement;
   }
 
-  public setDebug(Boolean debug) {
+  public void setDebug(Boolean debug) {
     this.request.debug = debug;
   }
 
-  public setTrace(Boolean trace) {
+  public void setTrace(Boolean trace) {
     this.request.trace = trace;
   }
 
-  public setNoop(Boolean noop) {
+  public void setNoop(Boolean noop) {
     this.request.noop = noop;
   }
 
-  public setEvalTrace(Boolean evalTrace) {
+  public void setEvalTrace(Boolean evalTrace) {
     this.request.evaltrace = evalTrace;
   }
 
-  public setTarget(String target) {
+  public void setTarget(String target) {
     this.request.target = target;
   }
 
-  private isSuccessful(peResponse) {
-    if ({400,404}.contains(peResponse.getResponseCode())) {
+  private Boolean isSuccessful(PEResponse peResponse) {
+    if (peResponse.getResponseCode() == 400 || peResponse.getResponseCode() == 404) {
       return false;
     }
 
     return true;
   }
 
-  public void execute(PERequest peRequest) {
-    LinkedTreeMap body = Gson.toJson(request);
-    PEResponse peResponse = peRequest.request(this.uri, body);
+  public void execute() throws PuppetOrchestratorException, Exception {
+    Gson gson = new Gson();
+    PEResponse peResponse = send(this.uri, request);
 
     if (isSuccessful(peResponse)) {
-      PuppetCommandDeployResponse response = Gson.fromJson(peResponse.getResponseBody(), PuppetCommandDeployResponse.class);
+      response = gson.fromJson(peResponse.getJSON(), PuppetCommandDeployResponse.class);
     } else {
-      PuppetCommandDeployError error = Gson.fromJson(peResponse.getResponseBody(), PuppetCommandDeployError.class);
-      throw PuppetOrchestratorException(error.kind, error.msg, error.details);
+      PuppetCommandDeployError error = gson.fromJson(peResponse.getJSON(), PuppetCommandDeployError.class);
+      throw new PuppetOrchestratorException(error.kind, error.msg, error.details);
     }
-
   }
 
   public String getID() {
-    response.getID();
+    return response.getID();
   }
 
   public String getName() {
-    response.getName();
+    return response.getName();
   }
 
   class PuppetCommandDeployRequest {
@@ -91,11 +106,13 @@ public class PuppetCommandDeployV1 {
       public Boolean whole_environment = null;
 
       public Boolean isEmpty() {
-        return (this.application == null && this.nodes == null && this.query == null);
+        return (this.application == null
+          && (this.nodes == null || this.nodes.isEmpty())
+          && this.query == null);
       }
     }
 
-    public setScope(String application, ArrayList nodes, String query) {
+    public void setScope(String application, ArrayList nodes, String query) {
       this.scope.application = application;
       this.scope.nodes = nodes;
       this.scope.query = query;
