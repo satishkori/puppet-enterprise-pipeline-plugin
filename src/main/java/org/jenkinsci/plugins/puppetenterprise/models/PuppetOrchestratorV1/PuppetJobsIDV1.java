@@ -1,18 +1,30 @@
+package org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1;
+
 import java.io.*;
 import java.util.*;
-
+import java.net.*;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import org.joda.time.DateTime;
+import org.jenkinsci.plugins.puppetenterprise.models.PEResponse;
+import org.jenkinsci.plugins.puppetenterprise.models.PuppetOrchestratorV1;
+import org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.puppetnodev1.*;
+import org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.PuppetOrchestratorException;
 
-import org.joda,time.DateTime;
-
-public class PuppetJobsIDV1 {
-  private String uri = "/orchestrator/v1/jobs/%s";
-  PuppetJobsIDResponse response = null;
+public class PuppetJobsIDV1 extends PuppetOrchestratorV1 {
+  private String endpoint = "/jobs/%s";
+  private PuppetJobsIDResponse response = null;
   private String name = "";
   private String state = "";
+  private ArrayList<PuppetNodeItemV1> nodes = new ArrayList();
+  private Integer nodeCount = null;
+  private String environment = "";
+
+  public PuppetJobsIDV1() {
+    this.response = new PuppetJobsIDResponse();
+  }
 
   public PuppetJobsIDV1(String name) {
     this.name = name;
@@ -23,35 +35,66 @@ public class PuppetJobsIDV1 {
     return this.state;
   }
 
-  public ArrayList<PuppetNodeItemV1> getNodes(PERequest peRequest, URL url) {
-    PEResponse peResponse = peRequest.request(url.toURI());
-
-    if (isSuccessful(peResponse)) {
-      return Gson.fromJson(peResponse.getResponseBody(), ArrayList<PuppetNodeItemV1>.class);
-    }
+  public String getEnvironment(){
+    return this.environment;
   }
 
-  public getNodeCount() {
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public ArrayList<PuppetNodeItemV1> getNodes() {
+    return this.nodes;
+  }
+
+  private ArrayList<PuppetNodeItemV1> getNodes(URL url) throws URISyntaxException, Exception {
+    URI uri = url.toURI();
+    PEResponse peResponse = send(url.toURI());
+    ArrayList<PuppetNodeItemV1> nodes = null;
+    Gson gson = new Gson();
+
+    // if (isSuccessful(peResponse)) {
+    //   nodes = gson.fromJson(peResponse.getJSON(), (ArrayList<PuppetNodeItemV1>).class);
+    // } else {
+    //   PuppetJobsIDError error = gson.fromJson(peResponse.getJSON(), PuppetJobsIDError.class);
+    //   throw new PuppetOrchestratorException(error.kind, error.msg, error.details);
+    // }
+
+    return nodes;
+  }
+
+  public Integer getNodeCount() {
     return this.nodeCount;
   }
 
-  public void execute(PERequest peRequest) throws PuppetOrchestratorException {
-    String fullURI = Sring.format(uri, this.name);
-    PEResponse peResponse = peRequest.request(fullURI);
+  public void execute() throws PuppetOrchestratorException, Exception {
+    URI fullURI = getURI(String.format(this.endpoint, this.name));
+    PEResponse peResponse = send(fullURI);
+    Gson gson = new Gson();
 
     if (isSuccessful(peResponse)) {
-      PuppetJobsIDResponse response = Gson.fromJson(peReponse.getResponseBody(), PuppetJobsIDResponse.class);
+      PuppetJobsIDResponse response = gson.fromJson(peResponse.getJSON(), PuppetJobsIDResponse.class);
       this.state = response.getLastStatus().state;
-      this.nodes = getNodes(peRequest, response.getNodesURL());
+
+      try {
+        this.nodes = getNodes(response.getNodesURL());
+      } catch(URISyntaxException e) {
+        throw new Exception("Puppet Enterprise Orchestrator API Error: Returned job " + this.name + " data contained invalid URL for node URL. Value was " + response.getNodesURL());
+      }
+
       this.nodeCount = response.node_count;
     } else {
-      PuppetJobsIDError error = Gson.fromJson(peResponse.getResponseBody(), PuppetJobsIDError.class);
-      throw PuppetOrchestratorException(error.kind, error.msg, error.details);
+      PuppetJobsIDError error = gson.fromJson(peResponse.getJSON(), PuppetJobsIDError.class);
+      throw new PuppetOrchestratorException(error.kind, error.msg, error.details);
     }
   }
 
-  public isSuccessul(PEResponse response) {
-    if ({400,404}.contains(response.getResponseCode()) {
+  public Boolean isSuccessful(PEResponse response) {
+    if (response.getResponseCode() == 400 || response.getResponseCode() == 404) {
       return false;
     }
 
@@ -60,7 +103,7 @@ public class PuppetJobsIDV1 {
 
   class PuppetJobsIDResponse {
     public ArrayList items = new ArrayList();
-    public URL id = new URL();
+    public URL id = null;
     public String name = "";
     public PuppetJobsIDResponseOptions options = new PuppetJobsIDResponseOptions();
     public Integer node_count = null;
@@ -90,7 +133,7 @@ public class PuppetJobsIDV1 {
     }
 
     public PuppetJobsIDResponseStatus getLastStatus() {
-      status.get(status.size() - 1);
+      return status.get(status.size() - 1);
     }
 
     public URL getNodesURL() {
