@@ -1,11 +1,11 @@
-package org.jenkinsci.plugins.puppetenterprise.models;
+package org.jenkinsci.plugins.puppetenterprise.apimanagers;
 
 import java.util.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.jenkinsci.plugins.workflow.PEException;
 import org.jenkinsci.plugins.puppetenterprise.models.PuppetEnterpriseConfig;
-import org.jenkinsci.plugins.puppetenterprise.models.PERequest;
+import org.jenkinsci.plugins.puppetenterprise.apimanagers.PERequest;
 
 public abstract class PuppetOrchestratorV1 extends PERequest {
   private String getOrchestratorAddress() {

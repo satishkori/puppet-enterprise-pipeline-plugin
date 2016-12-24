@@ -2,11 +2,11 @@ package org.jenkinsci.plugins.puppetenterprise.models;
 
 import java.io.*;
 import java.util.*;
-import org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.PuppetOrchestratorException;
-import org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.PuppetCommandDeployV1;
-import org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.PuppetJobsIDV1;
-import org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.puppetnodev1.*;
-import org.jenkinsci.plugins.puppetenterprise.models.PERequest;
+import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetorchestratorv1.PuppetOrchestratorException;
+import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetorchestratorv1.PuppetCommandDeployV1;
+import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetorchestratorv1.PuppetJobsIDV1;
+import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetorchestratorv1.puppetnodev1.*;
+import org.jenkinsci.plugins.puppetenterprise.apimanagers.PERequest;
 import com.google.gson.internal.LinkedTreeMap;
 
 public class PuppetJob {

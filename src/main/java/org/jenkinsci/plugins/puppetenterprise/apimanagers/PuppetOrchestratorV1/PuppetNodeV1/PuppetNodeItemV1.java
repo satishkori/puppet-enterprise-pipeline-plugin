@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.puppetnodev1;
+package org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetorchestratorv1.puppetnodev1;
 
 import com.google.gson.annotations.SerializedName;
 import java.net.*;

@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.puppetenterprise.models;
+package org.jenkinsci.plugins.puppetenterprise.apimanagers;
 
 import java.io.*;
 import java.util.*;

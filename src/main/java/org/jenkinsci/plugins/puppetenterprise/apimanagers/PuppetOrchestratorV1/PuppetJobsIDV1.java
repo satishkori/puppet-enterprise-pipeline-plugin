@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1;
+package org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetorchestratorv1;
 
 import java.io.*;
 import java.util.*;
@@ -10,9 +10,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import org.jenkinsci.plugins.puppetenterprise.models.PEResponse;
-import org.jenkinsci.plugins.puppetenterprise.models.PuppetOrchestratorV1;
-import org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.puppetnodev1.*;
-import org.jenkinsci.plugins.puppetenterprise.models.puppetorchestratorv1.PuppetOrchestratorException;
+import org.jenkinsci.plugins.puppetenterprise.apimanagers.PuppetOrchestratorV1;
+import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetorchestratorv1.puppetnodev1.*;
+import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetorchestratorv1.PuppetOrchestratorException;
 
 public class PuppetJobsIDV1 extends PuppetOrchestratorV1 {
   private String endpoint = "/jobs/%s";
