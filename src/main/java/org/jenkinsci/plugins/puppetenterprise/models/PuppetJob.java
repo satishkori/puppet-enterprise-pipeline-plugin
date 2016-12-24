@@ -19,7 +19,7 @@ public class PuppetJob {
   private String target = null;
   private String environment = null;
   private Integer concurrency = null;
-  private Boolean enforceEnvironment = null;
+  private Boolean enforceEnvironment = true;
   private Boolean debug = false;
   private Boolean trace = false;
   private Boolean noop = false;
@@ -150,11 +150,21 @@ public class PuppetJob {
 
     formattedReport.append("Puppet Job Name: " + this.name + "\n");
     formattedReport.append("State: " + this.state + "\n");
-    formattedReport.append("Environment: " + this.environment + "\n");
+
+    if (!this.enforceEnvironment) {
+      formattedReport.append("Environment: node's assigned environment\n");
+    } else {
+      formattedReport.append("Environment: " + this.environment + "\n");
+    }
+
     formattedReport.append("Nodes: " + this.nodeCount + "\n\n");
 
     for (PuppetNodeItemV1 node : this.nodes) {
       formattedReport.append(node.getName() + "\n");
+
+      if (node.getEnvironment() != null && !this.enforceEnvironment) {
+        formattedReport.append("  Environment: " + node.getEnvironment() + "\n");
+      }
 
       if (node.getMetrics() != null) {
         PuppetNodeMetricsV1 metrics = node.getMetrics();
