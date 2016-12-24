@@ -80,7 +80,7 @@ public class PuppetJob {
         Thread.currentThread().interrupt();
       }
 
-      update();
+      updateState();
     } while(isRunning());
 
     updateNodes();
@@ -128,13 +128,17 @@ public class PuppetJob {
     return (!this.state.equals("finished") && !this.state.equals("stopped") && !this.state.equals("failed"));
   }
 
-  public void update() throws PuppetOrchestratorException, Exception {
+  public void updateState() throws PuppetOrchestratorException, Exception {
     this.job.setToken(this.token);
     this.job.execute();
 
     this.state = this.job.getState();
-    this.environment = this.job.getEnvironment();
     this.nodeCount = this.job.getNodeCount();
+  }
+
+  public void update() throws PuppetOrchestratorException, Exception {
+    updateState();
+    updateNodes();
   }
 
   private void updateNodes() throws PuppetOrchestratorException, Exception {
@@ -174,7 +178,7 @@ public class PuppetJob {
         //There's always a message, but it's only useful if the run was not able to take place,
         //  which we'll know if there are no metrics.
         if (node.getMessage() != null) {
-          formattedReport.append(node.getMessage() + "\n");
+          formattedReport.append("  " + node.getMessage() + "\n");
           formattedReport.append("\n");
         }
       }
