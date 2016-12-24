@@ -97,12 +97,27 @@ public class PuppetJobsIDV1 extends PuppetOrchestratorV1 {
     public String name = "";
     public PuppetJobsIDResponseOptions options = new PuppetJobsIDResponseOptions();
     public Integer node_count = null;
-    public LinkedTreeMap<String,String> owner = new LinkedTreeMap();
+    public PuppetJobsIDResponseOwner owner = new PuppetJobsIDResponseOwner();
     public Date timestamp = null;
     public ArrayList<PuppetJobsIDResponseStatus> status = new ArrayList();
     private LinkedTreeMap<String,String> environment = new LinkedTreeMap();
     private LinkedTreeMap<String,URL> nodes = new LinkedTreeMap();
     private LinkedTreeMap<String,URL> report = new LinkedTreeMap();
+
+    class PuppetJobsIDResponseOwner {
+      public String email = null;
+      public Boolean is_revoked = null;
+      public Date last_login = null;
+      public Boolean is_remote = null;
+      public String login = null;
+      public ArrayList<Integer> inhereted_role_ids = null;
+      public ArrayList<String> group_ids = null;
+      public Boolean is_superuser = null;
+      public String id = null;
+      public ArrayList<Integer> role_ids = null;
+      public String display_name = null;
+      public Boolean is_group = null;
+    }
 
     class PuppetJobsIDResponseOptions {
       public Integer concurrency = null;
