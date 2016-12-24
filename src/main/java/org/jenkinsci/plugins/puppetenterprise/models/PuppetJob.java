@@ -25,6 +25,7 @@ public class PuppetJob {
   private Boolean noop = null;
   private Boolean evalTrace = null;
   private PuppetJobsIDV1 job = null;
+  private PrintStream logger = null;
 
   public PuppetJob() { }
 
@@ -32,6 +33,10 @@ public class PuppetJob {
     this.scope.put("application", application);
     this.scope.put("nodes", nodes);
     this.scope.put("query", query);
+  }
+
+  public void setLogger(PrintStream logger) {
+    this.logger = logger;
   }
 
   public void setTarget(String target) {
@@ -117,6 +122,8 @@ public class PuppetJob {
 
     this.name = deployCommand.getName();
     this.job = new PuppetJobsIDV1(this.name); //Create the JobID object
+
+    this.logger.println("Successfully started Puppet job " + this.name);
   }
 
   public void stop() throws PuppetOrchestratorException, Exception {

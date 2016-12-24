@@ -151,6 +151,7 @@ public final class PuppetJobStep extends AbstractStepImpl implements Serializabl
       job.setNoop(step.getNoop());
       job.setEnvironment(step.getEnvironment());
       job.setToken(step.getToken());
+      job.setLogger(listener.getLogger());
 
       // Target is still supported to support older versions of PE.
       // 2016.4 installs of PE should use the scope parameter when
