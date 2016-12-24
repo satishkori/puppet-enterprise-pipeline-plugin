@@ -10,9 +10,14 @@ public class PuppetNodeMetricsV1 {
   private Integer scheduled = 0;
   private Integer out_of_sync = 0;
   private Integer failed_to_restart = 0;
+  private String  message = "";
 
   public Integer getTotal() {
     return this.total;
+  }
+
+  public String getMessage() {
+    return this.message;
   }
 
   public Integer getFailed() {

@@ -28,8 +28,16 @@ public class PuppetNodeItemV1 {
     return this.name;
   }
 
+  public String getEnvironment() {
+    return this.details.getEnvironment();
+  }
+
+  public String getHash() {
+    return this.details.getHash();
+  }
+
   public String getMessage() {
-    return this.message;
+    return this.details.getMessage();
   }
 
   public URL getReportURL() {
@@ -47,13 +55,28 @@ public class PuppetNodeItemV1 {
     private URL reportUrl = null;
 
     private PuppetNodeMetricsV1 metrics = null;
+    private String message = "";
+    private String hash = "";
+    private String environment = "";
 
     public URL getReportURL() {
       return this.reportUrl;
     }
 
     public PuppetNodeMetricsV1 getMetrics() {
-      return metrics;
+      return this.metrics;
+    }
+
+    public String getMessage() {
+      return this.message;
+    }
+
+    public String getEnvironment() {
+      return this.environment;
+    }
+
+    public String getHash() {
+      return this.hash;
     }
   }
 }
