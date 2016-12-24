@@ -19,11 +19,11 @@ public class PuppetJob {
   private String target = null;
   private String environment = null;
   private Integer concurrency = null;
-  private Boolean enforceEnvironment = true;
-  private Boolean debug = false;
-  private Boolean trace = false;
-  private Boolean noop = false;
-  private Boolean evalTrace = false;
+  private Boolean enforceEnvironment = null;
+  private Boolean debug = null;
+  private Boolean trace = null;
+  private Boolean noop = null;
+  private Boolean evalTrace = null;
   private PuppetJobsIDV1 job = null;
 
   public PuppetJob() { }
@@ -68,6 +68,14 @@ public class PuppetJob {
 
   public void setEvalTrace(Boolean evalTrace) {
     this.evalTrace = evalTrace;
+  }
+
+  public String getState() {
+    return this.state;
+  }
+
+  public String getName() {
+    return this.name;
   }
 
   public void run() throws PuppetOrchestratorException, Exception {
@@ -145,13 +153,18 @@ public class PuppetJob {
     this.nodes = this.job.getNodes();
   }
 
+  private Boolean isEnvironmentEnforced() {
+    //The orchestrator defaults to true if null, so null is true
+    return (this.enforceEnvironment == null || this.enforceEnvironment);
+  }
+
   public String formatReport() {
     StringBuilder formattedReport = new StringBuilder();
 
     formattedReport.append("Puppet Job Name: " + this.name + "\n");
     formattedReport.append("State: " + this.state + "\n");
 
-    if (!this.enforceEnvironment) {
+    if (!isEnvironmentEnforced()) {
       formattedReport.append("Environment: node's assigned environment\n");
     } else {
       formattedReport.append("Environment: " + this.environment + "\n");
@@ -162,7 +175,7 @@ public class PuppetJob {
     for (PuppetNodeItemV1 node : this.nodes) {
       formattedReport.append(node.getName() + "\n");
 
-      if (node.getEnvironment() != null && !this.enforceEnvironment) {
+      if (node.getEnvironment() != null && !isEnvironmentEnforced()) {
         formattedReport.append("  Environment: " + node.getEnvironment() + "\n");
       }
 
