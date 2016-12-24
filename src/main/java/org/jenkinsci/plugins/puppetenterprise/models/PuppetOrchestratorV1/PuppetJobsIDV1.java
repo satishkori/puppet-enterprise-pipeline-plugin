@@ -49,14 +49,9 @@ public class PuppetJobsIDV1 extends PuppetOrchestratorV1 {
     return this.name;
   }
 
-  public ArrayList<PuppetNodeItemV1> getNodes() {
-    return this.nodes;
-  }
-
-  private ArrayList<PuppetNodeItemV1> getNodes(URL url) throws URISyntaxException, Exception {
-    URI uri = url.toURI();
-    PEResponse peResponse = send(url.toURI());
-    ArrayList<PuppetNodeItemV1> nodes = null;
+  public ArrayList<PuppetNodeItemV1> getNodes() throws URISyntaxException, Exception {
+    URI uri = response.getNodesURL().toURI();
+    PEResponse peResponse = send(uri);
 
     if (isSuccessful(peResponse)) {
       nodes = gson.fromJson(peResponse.getJSON(), PuppetNodeV1.class).getItems();
@@ -77,7 +72,7 @@ public class PuppetJobsIDV1 extends PuppetOrchestratorV1 {
     PEResponse peResponse = send(fullURI);
 
     if (isSuccessful(peResponse)) {
-      PuppetJobsIDResponse response = gson.fromJson(peResponse.getJSON(), PuppetJobsIDResponse.class);
+      response = gson.fromJson(peResponse.getJSON(), PuppetJobsIDResponse.class);
 
       this.state = response.state;
       this.nodeCount = response.node_count;
