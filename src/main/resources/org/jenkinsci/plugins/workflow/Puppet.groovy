@@ -66,12 +66,12 @@ class Puppet implements Serializable {
         credentials = credentialsId
       }
 
-      if (parameters.application) {
+      if (parameters.application != null) {
         assert parameters.application instanceof String
         application = parameters.application
       }
 
-      if (parameters.query) {
+      if (parameters.query != null) {
         assert parameters.query instanceof String
         query = parameters.query
       }
