@@ -76,7 +76,8 @@ class Puppet implements Serializable {
         query = parameters.query
       }
 
-      if (parameters.nodes) {
+      //Users should be allowed to pass empty lists
+      if (parameters.nodes != null) {
         assert parameters.nodes instanceof java.util.ArrayList
         nodes = parameters.nodes
       }

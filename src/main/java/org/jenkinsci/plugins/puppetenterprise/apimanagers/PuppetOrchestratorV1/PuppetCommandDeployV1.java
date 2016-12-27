@@ -107,7 +107,7 @@ public class PuppetCommandDeployV1 extends PuppetOrchestratorV1 {
 
       public Boolean isEmpty() {
         return (this.application == null
-          && (this.nodes == null || this.nodes.isEmpty())
+          && this.nodes == null
           && this.query == null);
       }
     }
