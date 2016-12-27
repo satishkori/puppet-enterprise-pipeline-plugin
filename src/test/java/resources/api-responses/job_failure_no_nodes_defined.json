@@ -1,0 +1,8 @@
+{
+  "kind" : "puppetlabs.orchestrator/empty-target",
+  "msg" : "No nodes were found for the specified target. Nothing to do.",
+  "details" : {
+    "environment" : "production",
+    "target" : "nodes"
+  }
+}
