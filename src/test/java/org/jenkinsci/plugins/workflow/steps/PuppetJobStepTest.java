@@ -425,9 +425,8 @@ public class PuppetJobStepTest extends Assert {
         "node { \n" +
         "  puppet.job 'production', nodes: [], credentials: 'pe-test-token'\n" +
         "}", true));
-        WorkflowRun result = job.scheduleBuild2(50).get();
+        WorkflowRun result = job.scheduleBuild2(0).get();
         story.j.assertBuildStatus(Result.FAILURE, result);
-        System.out.println("LOG: " + story.j.getLog(result));
         story.j.assertLogContains("Kind:    puppetlabs.orchestrator/empty-target", result);
       }
     });
@@ -476,6 +475,7 @@ public class PuppetJobStepTest extends Assert {
         WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Fails on Empty Application Name");
         job.setDefinition(new CpsFlowDefinition(
         "node { \n" +
+        "  puppet.credentials 'pe-test-token' \n" +
         "  puppet.job 'production', application: \"\"\n" +
         "}", true));
         WorkflowRun result = job.scheduleBuild2(0).get();
@@ -502,6 +502,7 @@ public class PuppetJobStepTest extends Assert {
         WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Fails on Empty Query");
         job.setDefinition(new CpsFlowDefinition(
         "node { \n" +
+        "  puppet.credentials 'pe-test-token' \n" +
         "  puppet.job 'production', application: \"\"\n" +
         "}", true));
         WorkflowRun result = job.scheduleBuild2(0).get();
