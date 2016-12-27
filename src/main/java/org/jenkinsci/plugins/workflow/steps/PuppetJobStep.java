@@ -164,23 +164,28 @@ public final class PuppetJobStep extends AbstractStepImpl implements Serializabl
 
       try {
         StringBuilder message = new StringBuilder();
+        String summary = "";
 
         job.run();
 
-        message.append("Puppet job " + job.getName() + " " + job.getState() + "\n---------\n");
+        summary = "Puppet job " + job.getName() + " " + job.getState() + "\n---------\n";
+        message.append(summary);
         message.append(job.formatReport());
 
+        listener.getLogger().println(job.formatReport());
+
         if (job.failed() || job.stopped()) {
-          throw new PEException(message.toString(), listener);
-        } else {
-          listener.getLogger().println(job.formatReport());
+          throw new Exception(summary);
         }
       } catch(PuppetOrchestratorException e) {
         StringBuilder message = new StringBuilder();
         message.append("Puppet Orchestrator Job Error\n");
         message.append("Kind:    " + e.getKind() + "\n");
         message.append("Message: " + e.getMessage() + "\n");
-        message.append("Details: " + e.getDetails().toString() + "\n");
+
+        if (e.getDetails() != null) {
+          message.append("Details: " + e.getDetails().toString() + "\n");
+        }
 
         throw new PEException(message.toString(), listener);
       }
