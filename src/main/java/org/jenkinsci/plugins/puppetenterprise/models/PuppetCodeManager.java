@@ -68,7 +68,7 @@ public class PuppetCodeManager {
 
       if (environment.hasError()) {
         CodeManagerEnvironmentErrorV1 error = environment.getError();
-        formattedReport.append("    Kind: " + error.getKind() + "\n");
+        formattedReport.append("    Kind:    " + error.getKind() + "\n");
         formattedReport.append("    Message: " + error.getMessage() + "\n");
 
         if (error.getDetails() != null) {
