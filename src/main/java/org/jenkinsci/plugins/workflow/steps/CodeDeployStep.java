@@ -43,7 +43,7 @@ import com.google.gson.internal.LinkedTreeMap;
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetcodemanagerv1.CodeManagerException;
 import org.jenkinsci.plugins.puppetenterprise.models.PEResponse;
 import org.jenkinsci.plugins.puppetenterprise.models.PuppetCodeManager;
-import org.jenkinsci.plugins.workflow.PEException;
+import org.jenkinsci.plugins.puppetenterprise.models.PEException;
 
 public final class CodeDeployStep extends PuppetEnterpriseStep implements Serializable {
   private ArrayList<String> environments = new ArrayList();

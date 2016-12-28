@@ -46,7 +46,7 @@ import org.jenkinsci.plugins.puppetenterprise.PuppetEnterpriseManagement;
 import org.jenkinsci.plugins.puppetenterprise.models.PEResponse;
 import org.jenkinsci.plugins.puppetenterprise.models.PuppetJob;
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetorchestratorv1.PuppetOrchestratorException;
-import org.jenkinsci.plugins.workflow.PEException;
+import org.jenkinsci.plugins.puppetenterprise.models.PEException;
 
 public final class PuppetJobStep extends PuppetEnterpriseStep implements Serializable {
 

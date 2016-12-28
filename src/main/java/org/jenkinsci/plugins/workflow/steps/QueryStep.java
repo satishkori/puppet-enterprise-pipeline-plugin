@@ -43,7 +43,7 @@ import com.google.gson.internal.LinkedTreeMap;
 import org.jenkinsci.plugins.puppetenterprise.PuppetEnterpriseManagement;
 import org.jenkinsci.plugins.puppetenterprise.models.PQLQuery;
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetdbv4.PuppetDBException;
-import org.jenkinsci.plugins.workflow.PEException;
+import org.jenkinsci.plugins.puppetenterprise.models.PEException;
 
 public final class QueryStep extends PuppetEnterpriseStep implements Serializable {
   private String query = "";
