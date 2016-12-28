@@ -14,6 +14,8 @@ import org.jenkinsci.plugins.puppetenterprise.models.PEResponse;
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.PuppetCodeManagerV1;
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetcodemanagerv1.CodeManagerEnvironmentV1;
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetcodemanagerv1.CodeManagerEnvironmentErrorV1;
+import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetcodemanagerv1.CodeManagerRBACError;
+import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetcodemanagerv1.CodeManagerException;
 
 public class CodeManagerDeploysV1 extends PuppetCodeManagerV1 {
   private URI uri = null;
@@ -38,8 +40,13 @@ public class CodeManagerDeploysV1 extends PuppetCodeManagerV1 {
     return this.deployedEnvironments;
   }
 
-  public void execute() throws Exception {
+  public void execute() throws CodeManagerException, Exception {
     PEResponse response = send(this.uri, this.request);
+
+    if (response.getResponseCode() == 401 || response.getResponseCode() == 403) {
+      CodeManagerRBACError error = gson.fromJson(response.getJSON(), CodeManagerRBACError.class);
+      throw new CodeManagerException(error.getKind(), error.getMessage(), error.getSubject());
+    }
 
     Type listOfEnvironmentsType = new TypeToken<ArrayList<CodeManagerEnvironmentV1>>(){}.getType();
     this.deployedEnvironments = gson.fromJson(response.getJSON(), listOfEnvironmentsType);
