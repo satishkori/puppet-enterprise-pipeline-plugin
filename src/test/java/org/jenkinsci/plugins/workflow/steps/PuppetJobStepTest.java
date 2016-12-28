@@ -220,6 +220,7 @@ public class PuppetJobStepTest extends Assert {
           "}", true));
         WorkflowRun result = job.scheduleBuild2(0).get();
         story.j.assertBuildStatus(Result.FAILURE, result);
+        story.j.assertLogContains("Error running puppet on doesnotexist: doesnotexist is not connected to the PCP broker", result);
 
         verify(postRequestedFor(urlMatching("/orchestrator/v1/command/deploy"))
             .withRequestBody(equalToJson("{\"environment\": \"production\", \"noop\" : false}"))
