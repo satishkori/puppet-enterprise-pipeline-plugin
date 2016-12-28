@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.workflow;
+package org.jenkinsci.plugins.puppetenterprise.models;
 
 import java.io.*;
 import java.util.logging.Level;

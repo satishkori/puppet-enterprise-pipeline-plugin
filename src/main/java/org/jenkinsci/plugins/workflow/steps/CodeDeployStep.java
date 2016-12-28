@@ -41,13 +41,11 @@ import java.io.InputStreamReader;
 import com.google.gson.internal.LinkedTreeMap;
 
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetcodemanagerv1.CodeManagerException;
-import org.jenkinsci.plugins.puppetenterprise.models.PEResponse;
 import org.jenkinsci.plugins.puppetenterprise.models.PuppetCodeManager;
-import org.jenkinsci.plugins.workflow.PEException;
+import org.jenkinsci.plugins.puppetenterprise.models.PEException;
 
 public final class CodeDeployStep extends PuppetEnterpriseStep implements Serializable {
   private ArrayList<String> environments = new ArrayList();
-  private String credentialsId = "";
 
   @DataBoundSetter private void setEnvironment(String environment) {
     this.environments.add(environment);
@@ -57,30 +55,8 @@ public final class CodeDeployStep extends PuppetEnterpriseStep implements Serial
     this.environments.addAll(environments);
   }
 
-  //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
-  @DataBoundSetter public void setCredentialsId(String credentialsId) {
-    this.credentialsId = Util.fixEmpty(credentialsId);
-  }
-
   public ArrayList<String> getEnvironments() {
     return this.environments;
-  }
-
-  private String getTokenID() {
-    return this.credentialsId;
-  }
-
-  //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
-  private String getToken() {
-    return lookupCredentials(this.credentialsId).getSecret().toString();
-  }
-
-  //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
-  private static StringCredentials lookupCredentials(@Nonnull String credentialId) {
-    return CredentialsMatchers.firstOrNull(
-      CredentialsProvider.lookupCredentials(StringCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, null),
-      CredentialsMatchers.withId(credentialId)
-    );
   }
 
   @DataBoundConstructor public CodeDeployStep() { }
@@ -100,7 +76,7 @@ public final class CodeDeployStep extends PuppetEnterpriseStep implements Serial
       try {
         codemanager.setToken(step.getToken());
       } catch(java.lang.NullPointerException e) {
-        String summary = "Could not find Jenkins credential with ID: " + step.getTokenID() + "\n";
+        String summary = "Could not find Jenkins credential with ID: " + step.getCredentialsId() + "\n";
         StringBuilder message = new StringBuilder();
 
         message.append(summary);

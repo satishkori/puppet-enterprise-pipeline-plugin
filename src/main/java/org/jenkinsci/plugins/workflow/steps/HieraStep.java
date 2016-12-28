@@ -39,7 +39,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import javax.annotation.Nonnull;
 
-import org.jenkinsci.plugins.workflow.PEException;
+import org.jenkinsci.plugins.puppetenterprise.models.PEException;
 import org.jenkinsci.plugins.puppetenterprise.models.HieraConfig;
 
 public final class HieraStep extends AbstractStepImpl {

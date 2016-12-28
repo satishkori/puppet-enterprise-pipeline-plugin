@@ -43,12 +43,11 @@ import java.io.InputStreamReader;
 import com.google.gson.internal.LinkedTreeMap;
 
 import org.jenkinsci.plugins.puppetenterprise.PuppetEnterpriseManagement;
-import org.jenkinsci.plugins.puppetenterprise.models.PEResponse;
 import org.jenkinsci.plugins.puppetenterprise.models.PuppetJob;
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetorchestratorv1.PuppetOrchestratorException;
-import org.jenkinsci.plugins.workflow.PEException;
+import org.jenkinsci.plugins.puppetenterprise.models.PEException;
 
-public final class PuppetJobStep extends AbstractStepImpl implements Serializable {
+public final class PuppetJobStep extends PuppetEnterpriseStep implements Serializable {
 
   private String target = null;
   private ArrayList nodes = null;
@@ -58,11 +57,6 @@ public final class PuppetJobStep extends AbstractStepImpl implements Serializabl
   private Boolean noop = false;
   private String environment = null;
   private String credentialsId = "";
-
-  //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
-  @DataBoundSetter public void setCredentialsId(String credentialsId) {
-    this.credentialsId = Util.fixEmpty(credentialsId);
-  }
 
   @DataBoundSetter private void setTarget(String target) {
     this.target = Util.fixEmpty(target);
@@ -118,19 +112,6 @@ public final class PuppetJobStep extends AbstractStepImpl implements Serializabl
 
   public Boolean getNoop() {
     return this.noop;
-  }
-
-  //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
-  private String getToken() {
-    return lookupCredentials(this.credentialsId).getSecret().toString();
-  }
-
-  //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
-  private static StringCredentials lookupCredentials(@Nonnull String credentialId) {
-    return CredentialsMatchers.firstOrNull(
-      CredentialsProvider.lookupCredentials(StringCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, null),
-      CredentialsMatchers.withId(credentialId)
-    );
   }
 
   @DataBoundConstructor public PuppetJobStep() { }
