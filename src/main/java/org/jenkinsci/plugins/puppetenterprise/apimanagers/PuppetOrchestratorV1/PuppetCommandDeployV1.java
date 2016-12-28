@@ -8,7 +8,7 @@ import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.PERequest;
-import org.jenkinsci.plugins.puppetenterprise.models.PEResponse;
+import org.jenkinsci.plugins.puppetenterprise.apimanagers.PEResponse;
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.PuppetOrchestratorV1;
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetorchestratorv1.PuppetOrchestratorException;
 

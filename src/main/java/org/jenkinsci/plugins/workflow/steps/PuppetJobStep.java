@@ -43,7 +43,6 @@ import java.io.InputStreamReader;
 import com.google.gson.internal.LinkedTreeMap;
 
 import org.jenkinsci.plugins.puppetenterprise.PuppetEnterpriseManagement;
-import org.jenkinsci.plugins.puppetenterprise.models.PEResponse;
 import org.jenkinsci.plugins.puppetenterprise.models.PuppetJob;
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetorchestratorv1.PuppetOrchestratorException;
 import org.jenkinsci.plugins.puppetenterprise.models.PEException;

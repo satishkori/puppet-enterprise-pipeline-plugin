@@ -55,8 +55,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import javax.annotation.Nonnull;
 
+import org.jenkinsci.plugins.puppetenterprise.apimanagers.PEResponse;
 import org.jenkinsci.plugins.puppetenterprise.models.PuppetEnterpriseConfig;
-import org.jenkinsci.plugins.puppetenterprise.models.PEResponse;
 import org.jenkinsci.plugins.puppetenterprise.models.PEException;
 
 public abstract class PERequest {
