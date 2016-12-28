@@ -118,7 +118,10 @@ public class QueryStepTest extends Assert {
           "  assert results instanceof ArrayList \n" +
           "  assert results[0].certname == 'gitlab.inf.puppet.vm' \n" +
           "}", true));
-        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+        WorkflowRun result = job.scheduleBuild2(0).get();
+        story.j.assertBuildStatusSuccess(result);
+        story.j.assertLogContains("nodes {}", result);
+        story.j.assertLogContains("Query returned 10 results.", result);
 
         verify(postRequestedFor(urlMatching("/pdb/query/v4"))
             .withRequestBody(equalToJson("{\"query\": \"nodes {}\"}"))
@@ -144,14 +147,17 @@ public class QueryStepTest extends Assert {
       public void evaluate() throws Throwable {
 
         //Create a job where the credentials are defined separately
-        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Successful Query of All Nodes");
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Successful Query of All Nodes With No Results");
         job.setDefinition(new CpsFlowDefinition(
           "node { \n" +
           "  puppet.credentials 'pe-test-token'\n" +
           "  results = puppet.query 'nodes {}'\n" +
           "  assert results instanceof ArrayList \n" +
           "}", true));
-        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+        WorkflowRun result = job.scheduleBuild2(0).get();
+        story.j.assertBuildStatusSuccess(result);
+        story.j.assertLogContains("nodes {}", result);
+        story.j.assertLogContains("Query returned 0 results.", result);
 
         verify(postRequestedFor(urlMatching("/pdb/query/v4"))
             .withRequestBody(equalToJson("{\"query\": \"nodes {}\"}"))
@@ -185,6 +191,54 @@ public class QueryStepTest extends Assert {
           "}", true));
         WorkflowRun result = job.scheduleBuild2(0).get();
         story.j.assertBuildStatus(Result.FAILURE, result);
+        story.j.assertLogContains("PQL Query Error", result);
+        story.j.assertLogContains("Kind:    puppetlabs.puppdb/malformed-query", result);
+        story.j.assertLogContains("Message: PQL parse error at line 1, column 7:", result);
+      }
+    });
+  }
+    @Test
+  public void queryFailsOnExpiredToken() throws Exception {
+
+    mockPuppetDBService.stubFor(post(urlEqualTo("/pdb/query/v4"))
+        .withHeader("content-type", equalTo("application/json"))
+        .willReturn(aResponse()
+            .withStatus(401)
+            .withHeader("Content-Type", "application/json")
+            .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "expired_token.json"))));
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Query Fails on Expired Token");
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.query 'production', credentials: 'pe-test-token'\n" +
+          "}", true));
+        WorkflowRun result = job.scheduleBuild2(0).get();
+        story.j.assertBuildStatus(Result.FAILURE, result);
+        story.j.assertLogContains("Kind:    puppetlabs.rbac/token-expired", result);
+        story.j.assertLogContains("Message: The provided token has expired.", result);
+      }
+    });
+  }
+
+  @Test
+  public void queryFailsOnMissingToken() throws Exception {
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Query Fails on Missing Token");
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.query 'production', credentials: 'doesnotexist'\n" +
+          "}", true));
+        WorkflowRun result = job.scheduleBuild2(0).get();
+        story.j.assertBuildStatus(Result.FAILURE, result);
+        story.j.assertLogContains("Could not find Jenkins credential with ID: doesnotexist", result);
+        story.j.assertLogContains("Please ensure the credentials exist in Jenkins. Note, the credentials description is not its ID", result);
       }
     });
   }
