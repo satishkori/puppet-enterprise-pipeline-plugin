@@ -130,7 +130,11 @@ public class CodeDeployStepTest extends Assert {
           "node { \n" +
           "  puppet.codeDeploy 'production', credentials: 'pe-test-token'\n" +
           "}", true));
-        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+
+        WorkflowRun result = job.scheduleBuild2(0).get();
+        story.j.assertBuildStatusSuccess(result);
+        story.j.assertLogContains("1 successful. 0 failed.", result);
+        story.j.assertLogContains("production: complete", result);
 
         verify(postRequestedFor(urlMatching("/code-manager/v1/deploys"))
             .withRequestBody(equalToJson("{\"environments\": [\"production\"], \"wait\": true}"))
@@ -161,6 +165,8 @@ public class CodeDeployStepTest extends Assert {
           "}", true));
         WorkflowRun result = job.scheduleBuild2(0).get();
         story.j.assertBuildStatus(Result.FAILURE, result);
+        story.j.assertLogContains("nosuchenv: failed", result);
+        story.j.assertLogContains("Kind:    puppetlabs.code-manager/deploy-failure", result);
       }
     });
   }
@@ -186,6 +192,27 @@ public class CodeDeployStepTest extends Assert {
           "}", true));
         WorkflowRun result = job.scheduleBuild2(0).get();
         story.j.assertBuildStatus(Result.FAILURE, result);
+        story.j.assertLogContains("Kind:    puppetlabs.rbac/token-expired", result);
+        story.j.assertLogContains("Message: The provided token has expired.", result);
+      }
+    });
+  }
+
+  @Test
+  public void codeDeployFailsOnMissingToken() throws Exception {
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Code Deploy Fails on Missing Token");
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.codeDeploy 'production', credentials: 'doesnotexist'\n" +
+          "}", true));
+        WorkflowRun result = job.scheduleBuild2(0).get();
+        story.j.assertBuildStatus(Result.FAILURE, result);
+        story.j.assertLogContains("Could not find Jenkins credential with ID: doesnotexist", result);
+        story.j.assertLogContains("Please ensure the credentials exist in Jenkins. Note, the credentials description is not its ID", result);
       }
     });
   }

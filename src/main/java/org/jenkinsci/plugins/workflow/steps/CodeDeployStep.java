@@ -14,9 +14,9 @@ import org.apache.commons.lang.StringUtils;
 import hudson.model.Run;
 import hudson.model.Item;
 import hudson.model.TaskListener;
+import java.net.*;
 import jenkins.model.Jenkins;
 import javax.annotation.Nonnull;
-import com.google.gson.internal.LinkedTreeMap;
 
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
@@ -38,23 +38,49 @@ import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import com.google.gson.internal.LinkedTreeMap;
 
-import org.jenkinsci.plugins.puppetenterprise.PuppetEnterpriseManagement;
+import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetcodemanagerv1.CodeManagerException;
 import org.jenkinsci.plugins.puppetenterprise.models.PEResponse;
+import org.jenkinsci.plugins.puppetenterprise.models.PuppetCodeManager;
 import org.jenkinsci.plugins.workflow.PEException;
 
 public final class CodeDeployStep extends PuppetEnterpriseStep implements Serializable {
-
-  private static final Logger logger = Logger.getLogger(CodeDeployStep.class.getName());
-
-  private String environment = "";
+  private ArrayList<String> environments = new ArrayList();
+  private String credentialsId = "";
 
   @DataBoundSetter private void setEnvironment(String environment) {
-    this.environment = Util.fixEmpty(environment);
+    this.environments.add(environment);
   }
 
-  public String getEnvironment() {
-    return this.environment;
+  @DataBoundSetter private void setEnvironments(ArrayList environments) {
+    this.environments.addAll(environments);
+  }
+
+  //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
+  @DataBoundSetter public void setCredentialsId(String credentialsId) {
+    this.credentialsId = Util.fixEmpty(credentialsId);
+  }
+
+  public ArrayList<String> getEnvironments() {
+    return this.environments;
+  }
+
+  private String getTokenID() {
+    return this.credentialsId;
+  }
+
+  //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
+  private String getToken() {
+    return lookupCredentials(this.credentialsId).getSecret().toString();
+  }
+
+  //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
+  private static StringCredentials lookupCredentials(@Nonnull String credentialId) {
+    return CredentialsMatchers.firstOrNull(
+      CredentialsProvider.lookupCredentials(StringCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, null),
+      CredentialsMatchers.withId(credentialId)
+    );
   }
 
   @DataBoundConstructor public CodeDeployStep() { }
@@ -66,71 +92,52 @@ public final class CodeDeployStep extends PuppetEnterpriseStep implements Serial
     @StepContextParameter private transient TaskListener listener;
 
     @Override protected Void run() throws Exception {
-      LinkedTreeMap body = new LinkedTreeMap();
-      ArrayList environments = new ArrayList();
-      environments.add(step.getEnvironment());
+      PuppetCodeManager codemanager = new PuppetCodeManager();
 
-      body.put("wait", true);
-      body.put("environments", environments);
+      codemanager.setEnvironments(step.getEnvironments());
+      codemanager.setWait(true);
 
-      PEResponse result = step.request("/code-manager/v1/deploys", 8170, "POST", body);
+      try {
+        codemanager.setToken(step.getToken());
+      } catch(java.lang.NullPointerException e) {
+        String summary = "Could not find Jenkins credential with ID: " + step.getTokenID() + "\n";
+        StringBuilder message = new StringBuilder();
 
-      if (!step.isSuccessful(result)) {
-        LinkedTreeMap error = null;
+        message.append(summary);
+        message.append("Please ensure the credentials exist in Jenkins. Note, the credentials description is not its ID\n");
 
-        // If we get a hash back, it usually means a problem with authentication.
-        // Otherwise, it's an error from deploying the enviornment code.
-        if (result.getResponseBody() instanceof LinkedTreeMap ) {
-          error = (LinkedTreeMap) result.getResponseBody();
-        } else {
-          ArrayList envResults = (ArrayList) result.getResponseBody();
-          LinkedTreeMap firstHash = (LinkedTreeMap) envResults.get(0);
-          error = (LinkedTreeMap) firstHash.get("error");
+        listener.getLogger().println(message.toString());
+        throw new PEException(summary);
+      }
+
+      try {
+        codemanager.deploy();
+      } catch(CodeManagerException e) {
+        StringBuilder message = new StringBuilder();
+        message.append("Puppet Code Manager Error\n");
+        message.append("Kind:    " + e.getKind() + "\n");
+        message.append("Message: " + e.getMessage() + "\n");
+
+        if (e.getSubject() != null) {
+          message.append("Subject: " + e.getSubject().toString() + "\n");
         }
 
-        logger.log(Level.SEVERE, error.toString());
-        throw new PEException(error.toString(), result.getResponseCode(), listener);
-      } else {
-        listener.getLogger().println("Successfully deployed " + environments + " Puppet environment code.");
-        logger.log(Level.INFO, "Successfully deployed " + environments + " Puppet environment code.");
+        throw new PEException(message.toString(), listener);
+      }
+
+      listener.getLogger().println(codemanager.formatReport());
+
+      if (codemanager.hasErrors()) {
+        Integer errorCount = codemanager.getErrors().size();
+        listener.getLogger().println("\n");
+        String message = errorCount.toString() + " Puppet environments failed to deploy.";
+        throw new PEException(message, listener);
       }
 
       return null;
     }
 
     private static final long serialVersionUID = 1L;
-  }
-
-  public Boolean isSuccessful(PEResponse response) {
-    Integer responseCode = response.getResponseCode();
-    Object responseBody = response.getResponseBody();
-
-    if (responseCode < 200 || responseCode >= 300) {
-      return false;
-    }
-
-    if (responseBody instanceof ArrayList) {
-      ArrayList responseList = (ArrayList) responseBody;
-
-      Iterator itr = responseList.iterator();
-      while(itr.hasNext()) {
-        LinkedTreeMap envResponse = (LinkedTreeMap) itr.next();
-
-        if (envResponse.get("status").equals("failed")) {
-          return false;
-        }
-      }
-    }
-
-    if (responseBody instanceof LinkedTreeMap) {
-      LinkedTreeMap responseHash = (LinkedTreeMap) responseBody;
-
-      if (responseHash.get("error") != null) {
-        return false;
-      }
-    }
-
-    return true;
   }
 
   @Extension public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
