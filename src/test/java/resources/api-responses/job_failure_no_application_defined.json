@@ -1,0 +1,8 @@
+{
+  "kind" : "puppetlabs.orchestrator/unknown-target",
+  "msg" : "The target was not found in environment production: ",
+  "details" : {
+    "environment" : "production",
+    "target" : ""
+  }
+}

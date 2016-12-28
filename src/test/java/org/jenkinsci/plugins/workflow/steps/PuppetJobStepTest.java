@@ -220,6 +220,7 @@ public class PuppetJobStepTest extends Assert {
           "}", true));
         WorkflowRun result = job.scheduleBuild2(0).get();
         story.j.assertBuildStatus(Result.FAILURE, result);
+        story.j.assertLogContains("Error running puppet on doesnotexist: doesnotexist is not connected to the PCP broker", result);
 
         verify(postRequestedFor(urlMatching("/orchestrator/v1/command/deploy"))
             .withRequestBody(equalToJson("{\"environment\": \"production\", \"noop\" : false}"))
@@ -256,6 +257,7 @@ public class PuppetJobStepTest extends Assert {
           "}", true));
         WorkflowRun result = job.scheduleBuild2(0).get();
         story.j.assertBuildStatus(Result.FAILURE, result);
+        story.j.assertLogContains("Kind:    puppetlabs.orchestrator/unknown-environment", result);
       }
     });
   }
@@ -281,6 +283,7 @@ public class PuppetJobStepTest extends Assert {
           "}", true));
         WorkflowRun result = job.scheduleBuild2(0).get();
         story.j.assertBuildStatus(Result.FAILURE, result);
+        story.j.assertLogContains("Kind:    puppetlabs.rbac/token-expired", result);
       }
     });
   }
@@ -402,6 +405,112 @@ public class PuppetJobStepTest extends Assert {
             .withRequestBody(equalToJson("{\"environment\": \"production\", \"noop\": true}"))
             .withHeader("X-Authentication", matching("super_secret_token_string"))
             .withHeader("Content-Type", matching("application/json")));
+      }
+    });
+  }
+
+  @Test
+  public void puppetJobFailsOnNoNodesDefined() throws Exception {
+
+    mockOrchestratorService.stubFor(post(urlEqualTo("/orchestrator/v1/command/deploy"))
+    .withHeader("content-type", equalTo("application/json"))
+    .willReturn(aResponse()
+      .withStatus(400)
+      .withHeader("Content-Type", "application/json")
+      .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "job_failure_no_nodes_defined.json"))));
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Fails on No Nodes Defined");
+        job.setDefinition(new CpsFlowDefinition(
+        "node { \n" +
+        "  puppet.job 'production', nodes: [], credentials: 'pe-test-token'\n" +
+        "}", true));
+        WorkflowRun result = job.scheduleBuild2(0).get();
+        story.j.assertBuildStatus(Result.FAILURE, result);
+        story.j.assertLogContains("Kind:    puppetlabs.orchestrator/empty-target", result);
+      }
+    });
+  }
+
+  @Test
+  public void puppetJobFailsOnNoNodesMatchingQuery() throws Exception {
+
+    mockOrchestratorService.stubFor(post(urlEqualTo("/orchestrator/v1/command/deploy"))
+    .withHeader("content-type", equalTo("application/json"))
+    .willReturn(aResponse()
+      .withStatus(400)
+      .withHeader("Content-Type", "application/json")
+      .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "job_failure_no_nodes_match_query.json"))));
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Fails on No Nodes Matching Query");
+        job.setDefinition(new CpsFlowDefinition(
+        "node { \n" +
+        "  puppet.job 'production', query: 'nodes { certname = \"doesnotexist\"}', credentials: 'pe-test-token'\n" +
+        "}", true));
+        WorkflowRun result = job.scheduleBuild2(0).get();
+        story.j.assertBuildStatus(Result.FAILURE, result);
+        story.j.assertLogContains("Kind:    puppetlabs.orchestrator/empty-target", result);
+      }
+    });
+  }
+
+  @Test
+  public void puppetJobFailsOnEmptyApplicationName() throws Exception {
+
+    mockOrchestratorService.stubFor(post(urlEqualTo("/orchestrator/v1/command/deploy"))
+    .withHeader("content-type", equalTo("application/json"))
+    .willReturn(aResponse()
+      .withStatus(404)
+      .withHeader("Content-Type", "application/json")
+      .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "job_failure_no_application_defined.json"))));
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Fails on Empty Application Name");
+        job.setDefinition(new CpsFlowDefinition(
+        "node { \n" +
+        "  puppet.credentials 'pe-test-token' \n" +
+        "  puppet.job 'production', application: \"\"\n" +
+        "}", true));
+        WorkflowRun result = job.scheduleBuild2(0).get();
+        story.j.assertBuildStatus(Result.FAILURE, result);
+        story.j.assertLogContains("Kind:    puppetlabs.orchestrator/unknown-target", result);
+      }
+    });
+  }
+
+  @Test
+  public void puppetJobFailsOnEmptyQuery() throws Exception {
+
+    mockOrchestratorService.stubFor(post(urlEqualTo("/orchestrator/v1/command/deploy"))
+    .withHeader("content-type", equalTo("application/json"))
+    .willReturn(aResponse()
+      .withStatus(400)
+      .withHeader("Content-Type", "application/json")
+      .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "job_failure_empty_query.json"))));
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Fails on Empty Query");
+        job.setDefinition(new CpsFlowDefinition(
+        "node { \n" +
+        "  puppet.credentials 'pe-test-token' \n" +
+        "  puppet.job 'production', application: \"\"\n" +
+        "}", true));
+        WorkflowRun result = job.scheduleBuild2(0).get();
+        story.j.assertBuildStatus(Result.FAILURE, result);
+        story.j.assertLogContains("Kind:    puppetlabs.orchestrator/query-error", result);
       }
     });
   }

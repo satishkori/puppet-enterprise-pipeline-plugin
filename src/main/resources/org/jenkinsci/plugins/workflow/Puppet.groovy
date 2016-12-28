@@ -55,7 +55,7 @@ class Puppet implements Serializable {
     String application
     String query
     String target = null
-    ArrayList nodes = []
+    ArrayList nodes = null
     Boolean noop = false
     Integer concurrency = null
 
@@ -66,17 +66,18 @@ class Puppet implements Serializable {
         credentials = credentialsId
       }
 
-      if (parameters.application) {
+      if (parameters.application != null) {
         assert parameters.application instanceof String
         application = parameters.application
       }
 
-      if (parameters.query) {
+      if (parameters.query != null) {
         assert parameters.query instanceof String
         query = parameters.query
       }
 
-      if (parameters.nodes) {
+      //Users should be allowed to pass empty lists
+      if (parameters.nodes != null) {
         assert parameters.nodes instanceof java.util.ArrayList
         nodes = parameters.nodes
       }

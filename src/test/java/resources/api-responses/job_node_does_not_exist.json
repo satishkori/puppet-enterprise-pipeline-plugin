@@ -1,14 +1,14 @@
 {
   "report" : {
-    "id" : "https://master.inf.puppet.vm:8143/orchestrator/v1/jobs/711/report"
+    "id" : "https://localhost:8143/orchestrator/v1/jobs/711/report"
   },
   "name" : "711",
   "events" : {
-    "id" : "https://master.inf.puppet.vm:8143/orchestrator/v1/jobs/711/events"
+    "id" : "https://localhost:8143/orchestrator/v1/jobs/711/events"
   },
   "state" : "failed",
   "nodes" : {
-    "id" : "https://master.inf.puppet.vm:8143/orchestrator/v1/jobs/711/nodes"
+    "id" : "https://localhost:8143/orchestrator/v1/jobs/711/nodes"
   },
   "status" : [ {
     "state" : "new",
@@ -27,7 +27,7 @@
     "enter_time" : "2016-12-15T18:20:29Z",
     "exit_time" : null
   } ],
-  "id" : "https://master.inf.puppet.vm:8143/orchestrator/v1/jobs/711",
+  "id" : "https://localhost:8143/orchestrator/v1/jobs/711",
   "environment" : {
     "name" : "production"
   },
