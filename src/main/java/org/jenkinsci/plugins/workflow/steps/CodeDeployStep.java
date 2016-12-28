@@ -42,6 +42,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import com.google.gson.internal.LinkedTreeMap;
 
+import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetcodemanagerv1.CodeManagerException;
 import org.jenkinsci.plugins.puppetenterprise.models.PEResponse;
 import org.jenkinsci.plugins.puppetenterprise.models.PuppetCodeManager;
 import org.jenkinsci.plugins.workflow.PEException;
@@ -65,6 +66,10 @@ public final class CodeDeployStep extends PuppetEnterpriseStep implements Serial
 
   public ArrayList<String> getEnvironments() {
     return this.environments;
+  }
+
+  private String getTokenID() {
+    return this.credentialsId;
   }
 
   //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
@@ -92,9 +97,35 @@ public final class CodeDeployStep extends PuppetEnterpriseStep implements Serial
       PuppetCodeManager codemanager = new PuppetCodeManager();
 
       codemanager.setEnvironments(step.getEnvironments());
-      codemanager.setToken(step.getToken());
       codemanager.setWait(true);
-      codemanager.deploy();
+
+      try {
+        codemanager.setToken(step.getToken());
+      } catch(java.lang.NullPointerException e) {
+        String summary = "Could not find Jenkins credential with ID: " + step.getTokenID() + "\n";
+        StringBuilder message = new StringBuilder();
+
+        message.append(summary);
+        message.append("Please ensure the credentials exist in Jenkins. Note, the credentials description is not its ID\n");
+
+        listener.getLogger().println(message.toString());
+        throw new PEException(summary);
+      }
+
+      try {
+        codemanager.deploy();
+      } catch(CodeManagerException e) {
+        StringBuilder message = new StringBuilder();
+        message.append("Puppet Code Manager Error\n");
+        message.append("Kind:    " + e.getKind() + "\n");
+        message.append("Message: " + e.getMessage() + "\n");
+
+        if (e.getSubject() != null) {
+          message.append("Subject: " + e.getSubject().toString() + "\n");
+        }
+
+        throw new PEException(message.toString(), listener);
+      }
 
       listener.getLogger().println(codemanager.formatReport());
 
