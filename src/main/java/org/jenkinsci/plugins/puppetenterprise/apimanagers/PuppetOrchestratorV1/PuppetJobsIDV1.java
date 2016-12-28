@@ -83,7 +83,8 @@ public class PuppetJobsIDV1 extends PuppetOrchestratorV1 {
   }
 
   public Boolean isSuccessful(PEResponse response) {
-    if (response.getResponseCode() == 400 || response.getResponseCode() == 404) {
+    Integer code = response.getResponseCode();
+    if (code == 400 || code == 404 || code == 401) {
       return false;
     }
 

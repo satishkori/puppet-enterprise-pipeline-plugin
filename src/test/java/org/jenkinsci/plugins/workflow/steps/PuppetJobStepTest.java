@@ -256,6 +256,7 @@ public class PuppetJobStepTest extends Assert {
           "}", true));
         WorkflowRun result = job.scheduleBuild2(0).get();
         story.j.assertBuildStatus(Result.FAILURE, result);
+        story.j.assertLogContains("Kind:    puppetlabs.orchestrator/unknown-environment", result);
       }
     });
   }
@@ -281,6 +282,7 @@ public class PuppetJobStepTest extends Assert {
           "}", true));
         WorkflowRun result = job.scheduleBuild2(0).get();
         story.j.assertBuildStatus(Result.FAILURE, result);
+        story.j.assertLogContains("Kind:    puppetlabs.rbac/token-expired", result);
       }
     });
   }

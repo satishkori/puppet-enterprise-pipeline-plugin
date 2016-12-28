@@ -61,7 +61,8 @@ public class PuppetCommandDeployV1 extends PuppetOrchestratorV1 {
   }
 
   private Boolean isSuccessful(PEResponse peResponse) {
-    if (peResponse.getResponseCode() == 400 || peResponse.getResponseCode() == 404) {
+    Integer code = peResponse.getResponseCode();
+    if (code == 400 || code == 404 || code == 401) {
       return false;
     }
 
