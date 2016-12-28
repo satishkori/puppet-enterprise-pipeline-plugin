@@ -41,21 +41,43 @@ import java.io.InputStreamReader;
 import com.google.gson.internal.LinkedTreeMap;
 
 import org.jenkinsci.plugins.puppetenterprise.PuppetEnterpriseManagement;
-import org.jenkinsci.plugins.puppetenterprise.models.PEResponse;
+import org.jenkinsci.plugins.puppetenterprise.models.PQLQuery;
+import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetdbv4.PuppetDBException;
 import org.jenkinsci.plugins.workflow.PEException;
 
-public final class QueryStep extends PuppetEnterpriseStep implements Serializable {
-
-  private static final Logger logger = Logger.getLogger(PuppetJobStep.class.getName());
-
+public final class QueryStep extends AbstractStepImpl implements Serializable {
   private String query = "";
+  private String credentialsId = null;
 
   @DataBoundSetter private void setQuery(String query) {
     this.query = query;
   }
 
+  //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
+  @DataBoundSetter public void setCredentialsId(String credentialsId) {
+    this.credentialsId = Util.fixEmpty(credentialsId);
+  }
+
   public String getQuery() {
     return this.query;
+  }
+
+  //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
+  private String getToken() {
+    return lookupCredentials(this.credentialsId).getSecret().toString();
+  }
+
+  //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
+  private String getTokenID() {
+    return this.credentialsId;
+  }
+
+  //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
+  private static StringCredentials lookupCredentials(@Nonnull String credentialId) {
+    return CredentialsMatchers.firstOrNull(
+      CredentialsProvider.lookupCredentials(StringCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, null),
+      CredentialsMatchers.withId(credentialId)
+    );
   }
 
   @DataBoundConstructor public QueryStep() { }
@@ -67,35 +89,43 @@ public final class QueryStep extends PuppetEnterpriseStep implements Serializabl
     @StepContextParameter private transient TaskListener listener;
 
     @Override protected ArrayList run() throws Exception {
-      LinkedTreeMap body = new LinkedTreeMap();
-      body.put("query", step.getQuery());
+      PQLQuery query = new PQLQuery();
+      ArrayList results = new ArrayList();
 
-      PEResponse result = step.request("/pdb/query/v4", 8081, "POST", body);
-      Object response = result.getResponseBody();
+      query.setQuery(step.getQuery());
 
-      if (!step.isSuccessful(result)) {
-        String error = (String) response;
+      try {
+        query.setToken(step.getToken());
+      } catch(java.lang.NullPointerException e) {
+        String summary = "Could not find Jenkins credential with ID: " + step.getTokenID() + "\n";
+        StringBuilder message = new StringBuilder();
 
-        logger.log(Level.SEVERE, error);
-        throw new PEException(error, result.getResponseCode());
+        message.append(summary);
+        message.append("Please ensure the credentials exist in Jenkins. Note, the credentials description is not its ID\n");
+
+        listener.getLogger().println(message.toString());
+        throw new PEException(summary);
       }
 
-      ArrayList responseArray = (ArrayList) response;
+      try {
+        query.run();
+      } catch(PuppetDBException e) {
+        StringBuilder message = new StringBuilder();
+        message.append("PQL Query Error\n");
+        message.append("Kind:    " + e.getKind() + "\n");
+        message.append("Message: " + e.getMessage() + "\n");
 
-      return responseArray;
+        throw new PEException(message.toString(), listener);
+      }
+
+      results = query.getResults();
+      Integer size = results.size();
+      listener.getLogger().println(step.getQuery() + "\nQuery returned " + size.toString() + " results.");
+
+      return results;
     }
 
     private static final long serialVersionUID = 1L;
-  }
-
-  public Boolean isSuccessful(PEResponse response) {
-    Integer responseCode = response.getResponseCode();
-
-    if (responseCode < 200 || responseCode >= 300) {
-      return false;
-    }
-
-    return true;
   }
 
   @Extension public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
