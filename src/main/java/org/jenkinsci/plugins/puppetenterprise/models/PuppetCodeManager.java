@@ -5,6 +5,7 @@ import java.util.*;
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetcodemanagerv1.CodeManagerDeploysV1;
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetcodemanagerv1.CodeManagerEnvironmentV1;
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetcodemanagerv1.CodeManagerEnvironmentErrorV1;
+import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetcodemanagerv1.CodeManagerException;
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.PERequest;
 import com.google.gson.internal.LinkedTreeMap;
 
@@ -42,7 +43,7 @@ public class PuppetCodeManager {
     return (errors.size() > 0);
   }
 
-  public void deploy() throws Exception {
+  public void deploy() throws CodeManagerException, Exception {
     CodeManagerDeploysV1 deploys = new CodeManagerDeploysV1();
     deploys.setEnvironments(this.environments);
     deploys.setWait(this.wait);
