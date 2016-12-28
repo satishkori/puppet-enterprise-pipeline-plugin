@@ -45,7 +45,7 @@ import org.jenkinsci.plugins.puppetenterprise.models.PQLQuery;
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetdbv4.PuppetDBException;
 import org.jenkinsci.plugins.workflow.PEException;
 
-public final class QueryStep extends AbstractStepImpl implements Serializable {
+public final class QueryStep extends PuppetEnterpriseStep implements Serializable {
   private String query = "";
   private String credentialsId = null;
 
@@ -53,31 +53,8 @@ public final class QueryStep extends AbstractStepImpl implements Serializable {
     this.query = query;
   }
 
-  //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
-  @DataBoundSetter public void setCredentialsId(String credentialsId) {
-    this.credentialsId = Util.fixEmpty(credentialsId);
-  }
-
   public String getQuery() {
     return this.query;
-  }
-
-  //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
-  private String getToken() {
-    return lookupCredentials(this.credentialsId).getSecret().toString();
-  }
-
-  //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
-  private String getTokenID() {
-    return this.credentialsId;
-  }
-
-  //TODO: Move this back to the PuppetEnterpriseStep class when done refactoring
-  private static StringCredentials lookupCredentials(@Nonnull String credentialId) {
-    return CredentialsMatchers.firstOrNull(
-      CredentialsProvider.lookupCredentials(StringCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, null),
-      CredentialsMatchers.withId(credentialId)
-    );
   }
 
   @DataBoundConstructor public QueryStep() { }
@@ -97,7 +74,7 @@ public final class QueryStep extends AbstractStepImpl implements Serializable {
       try {
         query.setToken(step.getToken());
       } catch(java.lang.NullPointerException e) {
-        String summary = "Could not find Jenkins credential with ID: " + step.getTokenID() + "\n";
+        String summary = "Could not find Jenkins credential with ID: " + step.getCredentialsId() + "\n";
         StringBuilder message = new StringBuilder();
 
         message.append(summary);
