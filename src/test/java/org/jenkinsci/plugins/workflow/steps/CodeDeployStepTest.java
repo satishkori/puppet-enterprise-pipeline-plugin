@@ -88,7 +88,7 @@ public class CodeDeployStepTest extends Assert {
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "code_deploy.json"))));
+            .withBody(TestUtils.getAPIResponseBody("2016.4", "/code-manager/v1/deploys", "code_deploy.json"))));
 
     story.addStep(new Statement() {
       @Override
@@ -119,7 +119,7 @@ public class CodeDeployStepTest extends Assert {
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "code_deploy.json"))));
+            .withBody(TestUtils.getAPIResponseBody("2016.4", "/code-manager/v1/deploys", "code_deploy.json"))));
 
     story.addStep(new Statement() {
       @Override
@@ -152,7 +152,7 @@ public class CodeDeployStepTest extends Assert {
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "code_deploy_failed_no_such_env.json"))));
+            .withBody(TestUtils.getAPIResponseBody("2016.4", "/code-manager/v1/deploys", "code_deploy_failed_no_such_env.json"))));
 
     story.addStep(new Statement() {
       @Override
@@ -179,7 +179,7 @@ public class CodeDeployStepTest extends Assert {
         .willReturn(aResponse()
             .withStatus(401)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "expired_token.json"))));
+            .withBody(TestUtils.getAPIResponseBody("2016.4", "/code-manager/v1/deploys", "expired_token.json"))));
 
     story.addStep(new Statement() {
       @Override

@@ -86,18 +86,6 @@ public class PuppetJobStepTest extends Assert {
     });
   }
 
-  private String getJobDetailsString() {
-    return TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "job_details.json");
-  }
-
-  private String getCommandDeployResponseString() {
-    return TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "job_deploy.json");
-  }
-
-  private String getJobNodeResults() {
-    return TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "job_node_results.json");
-  }
-
   private void stubJobDeploySuccessful() {
     mockOrchestratorService.stubFor(post(urlEqualTo("/orchestrator/v1/command/deploy"))
         .withHeader("content-type", equalTo("application/json"))
@@ -105,21 +93,21 @@ public class PuppetJobStepTest extends Assert {
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(getCommandDeployResponseString())));
+            .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/command/deploy", "job_deploy.json"))));
 
     mockOrchestratorService.stubFor(get(urlEqualTo("/orchestrator/v1/jobs/711"))
         .withHeader("X-Authentication", equalTo("super_secret_token_string"))
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(getJobDetailsString())));
+            .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/jobs/711", "job_details.json"))));
 
     mockOrchestratorService.stubFor(get(urlEqualTo("/orchestrator/v1/jobs/711/nodes"))
         .withHeader("X-Authentication", equalTo("super_secret_token_string"))
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(getJobNodeResults())));
+            .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/jobs/711/nodes", "job_node_results.json"))));
   }
 
   @Test
@@ -192,21 +180,21 @@ public class PuppetJobStepTest extends Assert {
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(getCommandDeployResponseString())));
+            .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/command/deploy", "job_deploy.json"))));
 
     mockOrchestratorService.stubFor(get(urlEqualTo("/orchestrator/v1/jobs/711"))
         .withHeader("X-Authentication", equalTo("super_secret_token_string"))
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "job_node_does_not_exist.json"))));
+            .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/jobs/711", "job_node_does_not_exist.json"))));
 
     mockOrchestratorService.stubFor(get(urlEqualTo("/orchestrator/v1/jobs/711/nodes"))
         .withHeader("X-Authentication", equalTo("super_secret_token_string"))
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "nodes_does_not_exist.json"))));
+            .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/jobs/711/nodes", "nodes_does_not_exist.json"))));
 
     story.addStep(new Statement() {
       @Override
@@ -270,7 +258,8 @@ public class PuppetJobStepTest extends Assert {
         .willReturn(aResponse()
             .withStatus(401)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "expired_token.json"))));
+            .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/command/deploy", "expired_token.json"))));
+
 
     story.addStep(new Statement() {
       @Override
@@ -417,7 +406,7 @@ public class PuppetJobStepTest extends Assert {
     .willReturn(aResponse()
       .withStatus(400)
       .withHeader("Content-Type", "application/json")
-      .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "job_failure_no_nodes_defined.json"))));
+      .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/command/deploy", "job_failure_no_nodes_defined.json"))));
 
     story.addStep(new Statement() {
       @Override
@@ -443,7 +432,7 @@ public class PuppetJobStepTest extends Assert {
     .willReturn(aResponse()
       .withStatus(400)
       .withHeader("Content-Type", "application/json")
-      .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "job_failure_no_nodes_match_query.json"))));
+      .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/command/deploy", "job_failure_no_nodes_match_query.json"))));
 
     story.addStep(new Statement() {
       @Override
@@ -469,7 +458,7 @@ public class PuppetJobStepTest extends Assert {
     .willReturn(aResponse()
       .withStatus(404)
       .withHeader("Content-Type", "application/json")
-      .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "job_failure_no_application_defined.json"))));
+      .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/command/deploy", "job_failure_no_application_defined.json"))));
 
     story.addStep(new Statement() {
       @Override
@@ -496,7 +485,7 @@ public class PuppetJobStepTest extends Assert {
     .willReturn(aResponse()
       .withStatus(400)
       .withHeader("Content-Type", "application/json")
-      .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "job_failure_empty_query.json"))));
+      .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/command/deploy", "job_failure_empty_query.json"))));
 
     story.addStep(new Statement() {
       @Override
