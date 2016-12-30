@@ -18,6 +18,9 @@ public class PuppetDBQueryV4 extends PuppetDBV4 {
   private URI uri = null;
   private PuppetDBQueryRequest request = new PuppetDBQueryRequest();
   private ArrayList results = new ArrayList();
+  //Note that dates are not parsed out of the returned JSON since we have no models
+  // for GSON to know what should be parsed as a Date object.
+  // TODO: Figure out a way to enable Date parsing with GSON without models
   Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").create();
 
   public PuppetDBQueryV4() throws Exception {
