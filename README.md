@@ -173,8 +173,8 @@ code management in Puppet Enterprise, go here: [https://docs.puppet.com/pe/lates
 * concurrency - Level of maximum concurrency when issuing Puppet runs. Defaults to unlimited. Integer.
 * noop - Whether to run Puppet in noop mode. Defaults to false. Boolean
 
-**Puppet Enterprise 2015.2 - 2016.3 Parameters**
-The following parameters should be used with Puppet Enterprise 2015.2 - 2016.3 for definining the job's run target.
+**Puppet Enterprise 2016.2 - 2016.3 Parameters**
+The following parameters should be used with Puppet Enterprise 2016.2 - 2016.3 for definining the job's run target.
 Note, the target parameter will work with Puppet Enterprise 2016.4+ but has been deprecated.
 
 * target - Target in environment to deploy to. Can be app, app instance, or app component. Defaults to entire environment. String
@@ -216,3 +216,10 @@ The following parameters should be used with Puppet Enterprise 2016.4+ for defin
   puppet.hiera path: 'dc1-us-example', key: 'list-example', value: ['a,'b','c']
   puppet.hiera path: 'host.example.com', key: 'hash-example', value: ['a':1, 'bool':false, 'c': 'string']
 ```
+
+# Compatibility
+
+This plugin is compatible with Puppet Enterprise 2016.2+
+
+Some step parameters are only available on newer versions of Puppet Enterprise.
+Those parameters are labeled as such.
