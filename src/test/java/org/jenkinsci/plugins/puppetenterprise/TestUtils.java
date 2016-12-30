@@ -50,6 +50,12 @@ public final class TestUtils {
     return fileContents;
   }
 
+  public static String getAPIResponseBody(String peVersion, String endpoint, String responseFile) {
+    String path = getResponsesBasePath() + File.separator + peVersion + File.separator + endpoint + File.separator + responseFile;
+    String contents = getFileContents(path);
+    return contents;
+  }
+
   public static String getCACertificateString() {
     return getFileContents(CACERTPATH);
   }
@@ -66,7 +72,7 @@ public final class TestUtils {
     return RESOURCESBASEPATH;
   }
 
-  public static String getAPIResonsesBasesPath() {
+  public static String getResponsesBasePath() {
     return APIRESPONSESBASEPATH;
   }
 }

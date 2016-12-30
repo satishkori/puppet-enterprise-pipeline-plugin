@@ -87,11 +87,11 @@ public class QueryStepTest extends Assert {
   }
 
   private String getNodeQueryResponseString() {
-    return TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "node_results.json");
+    return TestUtils.getAPIResponseBody("2016.4", "/pdb/query/v4", "node_results.json");
   }
 
   private String getBadQueryString() {
-    return TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "bad_query.json");
+    return TestUtils.getAPIResponseBody("2016.4", "/pdb/query/v4", "bad_query.json");
   }
 
   @Test
@@ -197,7 +197,8 @@ public class QueryStepTest extends Assert {
       }
     });
   }
-    @Test
+
+  @Test
   public void queryFailsOnExpiredToken() throws Exception {
 
     mockPuppetDBService.stubFor(post(urlEqualTo("/pdb/query/v4"))
@@ -205,7 +206,7 @@ public class QueryStepTest extends Assert {
         .willReturn(aResponse()
             .withStatus(401)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getFileContents(TestUtils.getAPIResonsesBasesPath() + "expired_token.json"))));
+            .withBody(TestUtils.getAPIResponseBody("2016.4", "pdb/query/v4", "expired_token.json"))));
 
     story.addStep(new Statement() {
       @Override
