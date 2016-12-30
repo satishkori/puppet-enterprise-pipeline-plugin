@@ -1,16 +1,16 @@
 package org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetorchestratorv1.puppetnodev1;
 
 public class PuppetNodeMetricsV1 {
-  private Integer total = 0;
-  private Integer failed = 0;
-  private Integer changed = 0;
-  private Integer corrective_changed = 0;
-  private Integer skipped = 0;
-  private Integer restarted = 0;
-  private Integer scheduled = 0;
-  private Integer out_of_sync = 0;
-  private Integer failed_to_restart = 0;
-  private String  message = "";
+  private Integer total = null;
+  private Integer failed = null;
+  private Integer changed = null;
+  private Integer corrective_change = null;
+  private Integer skipped = null;
+  private Integer restarted = null;
+  private Integer scheduled = null;
+  private Integer out_of_sync = null;
+  private Integer failed_to_restart = null;
+  private String  message = null;
 
   public Integer getTotal() {
     return this.total;
@@ -29,7 +29,7 @@ public class PuppetNodeMetricsV1 {
   }
 
   public Integer getCorrectiveChanged() {
-    return this.corrective_changed;
+    return this.corrective_change;
   }
 
   public Integer getSkipped() {
