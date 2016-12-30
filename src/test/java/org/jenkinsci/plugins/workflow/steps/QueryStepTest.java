@@ -115,13 +115,20 @@ public class QueryStepTest extends Assert {
           "node { \n" +
           "  puppet.credentials 'pe-test-token'\n" +
           "  results = puppet.query 'nodes {}'\n" +
-          "  assert results instanceof ArrayList \n" +
-          "  assert results[0].certname == 'gitlab.inf.puppet.vm' \n" +
+          "  println 'Root object is of type: ' + results.getClass()\n" +
+          "  println 'First object latest_report_corrective_change is of type: ' + results[0]['latest_report_corrective_change'].getClass()\n" +
+          "  println 'First object facts_timestamp is of type: ' + results[0]['facts_timestamp'].getClass()\n" +
+          "  println 'First certname is: ' + results[0].certname\n" +
           "}", true));
         WorkflowRun result = job.scheduleBuild2(0).get();
         story.j.assertBuildStatusSuccess(result);
         story.j.assertLogContains("nodes {}", result);
         story.j.assertLogContains("Query returned 10 results.", result);
+        story.j.assertLogContains("Root object is of type: class java.util.ArrayList", result);
+        story.j.assertLogContains("First object latest_report_corrective_change is of type: class java.lang.Boolean", result);
+        //TODO: The timestamp should be a Date object in a future release with breaking changes
+        story.j.assertLogContains("First object facts_timestamp is of type: class java.lang.String", result);
+        story.j.assertLogContains("First certname is: gitlab.inf.puppet.vm", result);
 
         verify(postRequestedFor(urlMatching("/pdb/query/v4"))
             .withRequestBody(equalToJson("{\"query\": \"nodes {}\"}"))
