@@ -9,7 +9,10 @@ import org.junit.ClassRule;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runners.model.Statement;
+import org.junit.experimental.theories.*;
+import org.junit.runner.RunWith;
 
+import static org.junit.Assume.*;
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 
@@ -39,6 +42,7 @@ import java.io.FileNotFoundException;
 import java.lang.StringBuffer;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
@@ -51,7 +55,10 @@ import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import org.jenkinsci.plugins.puppetenterprise.models.PuppetEnterpriseConfig;
 import org.jenkinsci.plugins.puppetenterprise.TestUtils;
 
+@RunWith(Theories.class)
 public class PuppetJobStepTest extends Assert {
+
+  public static @DataPoints String[] PEVersions = {"2016.2","2016.4"};
 
   @ClassRule
   public static WireMockRule mockOrchestratorService = new WireMockRule(options()
@@ -86,41 +93,41 @@ public class PuppetJobStepTest extends Assert {
     });
   }
 
-  private void stubJobDeploySuccessful() {
+  private void stubJobDeploySuccessful(String peVersion) {
     mockOrchestratorService.stubFor(post(urlEqualTo("/orchestrator/v1/command/deploy"))
         .withHeader("content-type", equalTo("application/json"))
         .withHeader("X-Authentication", equalTo("super_secret_token_string"))
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/command/deploy", "job_deploy.json"))));
+            .withBody(TestUtils.getAPIResponseBody(peVersion, "/orchestrator/v1/command/deploy", "job_deploy.json"))));
 
     mockOrchestratorService.stubFor(get(urlEqualTo("/orchestrator/v1/jobs/711"))
         .withHeader("X-Authentication", equalTo("super_secret_token_string"))
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/jobs/711", "job_details.json"))));
+            .withBody(TestUtils.getAPIResponseBody(peVersion, "/orchestrator/v1/jobs/711", "job_details.json"))));
 
     mockOrchestratorService.stubFor(get(urlEqualTo("/orchestrator/v1/jobs/711/nodes"))
         .withHeader("X-Authentication", equalTo("super_secret_token_string"))
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/jobs/711/nodes", "job_node_results.json"))));
+            .withBody(TestUtils.getAPIResponseBody(peVersion, "/orchestrator/v1/jobs/711/nodes", "job_node_results.json"))));
   }
 
-  @Test
-  public void puppetJobSeparateCredentialsCallSuccessful() throws Exception {
+  @Theory
+  public void puppetJobSeparateCredentialsCallSuccessful(final String peVersion) throws Exception {
 
-    stubJobDeploySuccessful();
+    stubJobDeploySuccessful(peVersion);
 
     story.addStep(new Statement() {
       @Override
       public void evaluate() throws Throwable {
 
         //Create a job where the credentials are defined separately
-        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job with Credentials Defined Separately");
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job with Credentials Defined Separately Against " + peVersion);
         job.setDefinition(new CpsFlowDefinition(
           "node { \n" +
           "  puppet.credentials 'pe-test-token'\n" +
@@ -139,19 +146,19 @@ public class PuppetJobStepTest extends Assert {
         verify(getRequestedFor(urlMatching("/orchestrator/v1/jobs/711/nodes"))
             .withHeader("X-Authentication", matching("super_secret_token_string")));
       }
-      });
+    });
   }
 
-  @Test
-  public void puppetJobCredentialsInMethodSuccessful() throws Exception {
+  @Theory
+  public void puppetJobCredentialsInMethodSuccessful(final String peVersion) throws Exception {
 
-    stubJobDeploySuccessful();
+    stubJobDeploySuccessful(peVersion);
 
     story.addStep(new Statement() {
       @Override
       public void evaluate() throws Throwable {
         //Create a job where the credentials are defined as part of the job method call
-        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job with Credentials Defined With Method Call");
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job with Credentials Defined With Method Call Against " + peVersion);
         job.setDefinition(new CpsFlowDefinition(
           "node { \n" +
           "  puppet.job 'production', credentials: 'pe-test-token'\n" +
@@ -172,35 +179,35 @@ public class PuppetJobStepTest extends Assert {
     });
   }
 
-  @Test
-  public void puppetJobNonExistantNodeFails() throws Exception {
+  @Theory
+  public void puppetJobNonExistantNodeFails(final String peVersion) throws Exception {
     mockOrchestratorService.stubFor(post(urlEqualTo("/orchestrator/v1/command/deploy"))
         .withHeader("content-type", equalTo("application/json"))
         .withHeader("X-Authentication", equalTo("super_secret_token_string"))
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/command/deploy", "job_deploy.json"))));
+            .withBody(TestUtils.getAPIResponseBody(peVersion, "/orchestrator/v1/command/deploy", "job_deploy.json"))));
 
     mockOrchestratorService.stubFor(get(urlEqualTo("/orchestrator/v1/jobs/711"))
         .withHeader("X-Authentication", equalTo("super_secret_token_string"))
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/jobs/711", "job_node_does_not_exist.json"))));
+            .withBody(TestUtils.getAPIResponseBody(peVersion, "/orchestrator/v1/jobs/711", "job_node_does_not_exist.json"))));
 
     mockOrchestratorService.stubFor(get(urlEqualTo("/orchestrator/v1/jobs/711/nodes"))
         .withHeader("X-Authentication", equalTo("super_secret_token_string"))
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/jobs/711/nodes", "nodes_does_not_exist.json"))));
+            .withBody(TestUtils.getAPIResponseBody(peVersion, "/orchestrator/v1/jobs/711/nodes", "nodes_does_not_exist.json"))));
 
     story.addStep(new Statement() {
       @Override
       public void evaluate() throws Throwable {
         //Create a job where the credentials are defined as part of the job method call
-        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Using List of Nodes Where Node Does Not Exist Fails");
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Using List of Nodes Where Node Does Not Exist Fails Against " + peVersion);
         job.setDefinition(new CpsFlowDefinition(
           "node { \n" +
           "  puppet.credentials 'pe-test-token' \n" +
@@ -250,22 +257,22 @@ public class PuppetJobStepTest extends Assert {
     });
   }
 
-  @Test
-  public void puppetJobFailsOnExpiredToken() throws Exception {
+  @Theory
+  public void puppetJobFailsOnExpiredToken(final String peVersion) throws Exception {
 
     mockOrchestratorService.stubFor(post(urlEqualTo("/orchestrator/v1/command/deploy"))
         .withHeader("content-type", equalTo("application/json"))
         .willReturn(aResponse()
             .withStatus(401)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/command/deploy", "expired_token.json"))));
+            .withBody(TestUtils.getAPIResponseBody(peVersion, "/orchestrator/v1/command/deploy", "expired_token.json"))));
 
 
     story.addStep(new Statement() {
       @Override
       public void evaluate() throws Throwable {
 
-        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Fails on Expired Token");
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Fails on Expired Token Against " + peVersion);
         job.setDefinition(new CpsFlowDefinition(
           "node { \n" +
           "  puppet.job 'production', credentials: 'pe-test-token'\n" +
@@ -296,9 +303,6 @@ public class PuppetJobStepTest extends Assert {
             .withRequestBody(equalToJson("{\"environment\": \"production\", \"scope\": {\"application\": \"MyApp\"}, \"noop\": false}"))
             .withHeader("X-Authentication", matching("super_secret_token_string"))
             .withHeader("Content-Type", matching("application/json")));
-
-        verify(getRequestedFor(urlMatching("/orchestrator/v1/jobs/711"))
-            .withHeader("X-Authentication", matching("super_secret_token_string")));
       }
     });
 
@@ -398,21 +402,23 @@ public class PuppetJobStepTest extends Assert {
     });
   }
 
-  @Test
-  public void puppetJobFailsOnNoNodesDefined() throws Exception {
+  @Theory
+  public void puppetJobFailsOnNoNodesDefined(final String peVersion) throws Exception {
+    //2016.2 did not support appliction parameter for orchestrator jobs
+    assumeThat(peVersion, is(not("2016.2")));
 
     mockOrchestratorService.stubFor(post(urlEqualTo("/orchestrator/v1/command/deploy"))
     .withHeader("content-type", equalTo("application/json"))
     .willReturn(aResponse()
       .withStatus(400)
       .withHeader("Content-Type", "application/json")
-      .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/command/deploy", "job_failure_no_nodes_defined.json"))));
+      .withBody(TestUtils.getAPIResponseBody(peVersion, "/orchestrator/v1/command/deploy", "job_failure_no_nodes_defined.json"))));
 
     story.addStep(new Statement() {
       @Override
       public void evaluate() throws Throwable {
 
-        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Fails on No Nodes Defined");
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Fails on No Nodes Defined Against " + peVersion);
         job.setDefinition(new CpsFlowDefinition(
         "node { \n" +
         "  puppet.job 'production', nodes: [], credentials: 'pe-test-token'\n" +
@@ -424,21 +430,23 @@ public class PuppetJobStepTest extends Assert {
     });
   }
 
-  @Test
-  public void puppetJobFailsOnNoNodesMatchingQuery() throws Exception {
+  @Theory
+  public void puppetJobFailsOnNoNodesMatchingQuery(final String peVersion) throws Exception {
+    //2016.2 did not support PQL for orchestrator jobs
+    assumeThat(peVersion, is(not("2016.2")));
 
     mockOrchestratorService.stubFor(post(urlEqualTo("/orchestrator/v1/command/deploy"))
     .withHeader("content-type", equalTo("application/json"))
     .willReturn(aResponse()
       .withStatus(400)
       .withHeader("Content-Type", "application/json")
-      .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/command/deploy", "job_failure_no_nodes_match_query.json"))));
+      .withBody(TestUtils.getAPIResponseBody(peVersion, "/orchestrator/v1/command/deploy", "job_failure_no_nodes_match_query.json"))));
 
     story.addStep(new Statement() {
       @Override
       public void evaluate() throws Throwable {
 
-        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Fails on No Nodes Matching Query");
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Fails on No Nodes Matching Query Against " + peVersion);
         job.setDefinition(new CpsFlowDefinition(
         "node { \n" +
         "  puppet.job 'production', query: 'nodes { certname = \"doesnotexist\"}', credentials: 'pe-test-token'\n" +
@@ -450,21 +458,23 @@ public class PuppetJobStepTest extends Assert {
     });
   }
 
-  @Test
-  public void puppetJobFailsOnEmptyApplicationName() throws Exception {
+  @Theory
+  public void puppetJobFailsOnEmptyApplicationName(final String peVersion) throws Exception {
+    //2016.2 did not support appliction parameter for orchestrator jobs
+    assumeThat(peVersion, is(not("2016.2")));
 
     mockOrchestratorService.stubFor(post(urlEqualTo("/orchestrator/v1/command/deploy"))
     .withHeader("content-type", equalTo("application/json"))
     .willReturn(aResponse()
       .withStatus(404)
       .withHeader("Content-Type", "application/json")
-      .withBody(TestUtils.getAPIResponseBody("2016.4", "/orchestrator/v1/command/deploy", "job_failure_no_application_defined.json"))));
+      .withBody(TestUtils.getAPIResponseBody(peVersion, "/orchestrator/v1/command/deploy", "job_failure_no_application_defined.json"))));
 
     story.addStep(new Statement() {
       @Override
       public void evaluate() throws Throwable {
 
-        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Fails on Empty Application Name");
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job Fails on Empty Application Name Against " + peVersion);
         job.setDefinition(new CpsFlowDefinition(
         "node { \n" +
         "  puppet.credentials 'pe-test-token' \n" +
@@ -477,8 +487,10 @@ public class PuppetJobStepTest extends Assert {
     });
   }
 
-  @Test
-  public void puppetJobFailsOnEmptyQuery() throws Exception {
+  @Theory
+  public void puppetJobFailsOnEmptyQuery(final String peVersion) throws Exception {
+    //2016.2 did not support PQL for orchestrator jobs
+    assumeThat(peVersion, is(not("2016.2")));
 
     mockOrchestratorService.stubFor(post(urlEqualTo("/orchestrator/v1/command/deploy"))
     .withHeader("content-type", equalTo("application/json"))

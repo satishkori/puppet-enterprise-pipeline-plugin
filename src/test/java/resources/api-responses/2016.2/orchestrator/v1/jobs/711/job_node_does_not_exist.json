@@ -1,0 +1,53 @@
+{
+  "report" : {
+    "id" : "https://localhost:8143/orchestrator/v1/jobs/711/report"
+  },
+  "name" : "711",
+  "events" : {
+    "id" : "https://localhost:8143/orchestrator/v1/jobs/711/events"
+  },
+  "state" : "failed",
+  "nodes" : {
+    "id" : "https://localhost:8143/orchestrator/v1/jobs/711/nodes"
+  },
+  "status" : [ {
+    "state" : "new",
+    "enter_time" : "2016-12-15T18:20:28Z",
+    "exit_time" : "2016-12-15T18:20:29Z"
+  }, {
+    "state" : "ready",
+    "enter_time" : "2016-12-15T18:20:29Z",
+    "exit_time" : "2016-12-15T18:20:29Z"
+  }, {
+    "state" : "running",
+    "enter_time" : "2016-12-15T18:20:29Z",
+    "exit_time" : "2016-12-15T18:20:29Z"
+  }, {
+    "state" : "failed",
+    "enter_time" : "2016-12-15T18:20:29Z",
+    "exit_time" : null
+  } ],
+  "id" : "https://localhost:8143/orchestrator/v1/jobs/711",
+  "environment" : {
+    "name" : "production"
+  },
+  "options" : {
+    "concurrency" : null,
+    "noop" : false,
+    "trace" : false,
+    "debug" : false,
+    "scope" : {
+      "nodes" : [ "doesnotexist" ]
+    },
+    "enforce_environment" : true,
+    "environment" : "production",
+    "evaltrace" : false,
+    "target" : "nodes"
+  },
+  "timestamp" : "2016-12-15T18:20:29Z",
+  "owner" : {
+    "id" : "aee1744a-a40e-4e27-b83b-c0bb27775374",
+    "login" : "casey"
+  },
+  "node_count" : 1
+}

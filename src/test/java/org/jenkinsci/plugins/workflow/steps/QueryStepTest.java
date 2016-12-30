@@ -197,7 +197,8 @@ public class QueryStepTest extends Assert {
       }
     });
   }
-    @Test
+
+  @Test
   public void queryFailsOnExpiredToken() throws Exception {
 
     mockPuppetDBService.stubFor(post(urlEqualTo("/pdb/query/v4"))
