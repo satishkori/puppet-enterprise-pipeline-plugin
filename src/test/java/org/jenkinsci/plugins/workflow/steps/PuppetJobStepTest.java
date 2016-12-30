@@ -163,7 +163,20 @@ public class PuppetJobStepTest extends Assert {
           "node { \n" +
           "  puppet.job 'production', credentials: 'pe-test-token'\n" +
           "}", true));
-        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+        WorkflowRun result = job.scheduleBuild2(0).get();
+        story.j.assertBuildStatusSuccess(result);
+        story.j.assertLogContains("Successfully started Puppet job 711", result);
+        story.j.assertLogContains("Puppet Job Name: 711", result);
+        story.j.assertLogContains("State: finished", result);
+        story.j.assertLogContains("Environment: production", result);
+        story.j.assertLogContains("Nodes: 11", result);
+
+        if (peVersion.equals("2016.2")) {
+          //Previous to 2016.4, PE did not support corrective changes
+          story.j.assertLogContains("Resource Events: 0 failed   0 changed   0 skipped", result);
+        } else {
+          story.j.assertLogContains("Resource Events: 0 failed   0 changed   0 corrective   0 skipped", result);
+        }
 
         verify(postRequestedFor(urlMatching("/orchestrator/v1/command/deploy"))
             .withRequestBody(equalToJson("{\"environment\": \"production\", \"noop\" : false}"))
