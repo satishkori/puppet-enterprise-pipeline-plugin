@@ -7,6 +7,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.ClassRule;
 import org.junit.runners.model.Statement;
+import org.junit.experimental.theories.*;
+import org.junit.runner.RunWith;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -45,7 +47,10 @@ import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import org.jenkinsci.plugins.puppetenterprise.models.PuppetEnterpriseConfig;
 import org.jenkinsci.plugins.puppetenterprise.TestUtils;
 
+@RunWith(Theories.class)
 public class CodeDeployStepTest extends Assert {
+
+  public static @DataPoints String[] PEVersions = {"2016.2","2016.4"};
 
   @ClassRule
   public static WireMockRule mockCodeManagerService = new WireMockRule(options()
@@ -80,15 +85,15 @@ public class CodeDeployStepTest extends Assert {
     });
   }
 
-  @Test
-  public void codeDeploySeparateCredentialsCallSuccessful() throws Exception {
+  @Theory
+  public void codeDeploySeparateCredentialsCallSuccessful(final String peVersion) throws Exception {
 
     mockCodeManagerService.stubFor(post(urlEqualTo("/code-manager/v1/deploys"))
         .withHeader("content-type", equalTo("application/json"))
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getAPIResponseBody("2016.4", "/code-manager/v1/deploys", "code_deploy.json"))));
+            .withBody(TestUtils.getAPIResponseBody(peVersion, "/code-manager/v1/deploys", "code_deploy.json"))));
 
     story.addStep(new Statement() {
       @Override
@@ -111,15 +116,15 @@ public class CodeDeployStepTest extends Assert {
     });
   }
 
-  @Test
-  public void codeDeployCredentialsInMethodSuccessful() throws Exception {
+  @Theory
+  public void codeDeployCredentialsInMethodSuccessful(final String peVersion) throws Exception {
 
     mockCodeManagerService.stubFor(post(urlEqualTo("/code-manager/v1/deploys"))
         .withHeader("content-type", equalTo("application/json"))
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getAPIResponseBody("2016.4", "/code-manager/v1/deploys", "code_deploy.json"))));
+            .withBody(TestUtils.getAPIResponseBody(peVersion, "/code-manager/v1/deploys", "code_deploy.json"))));
 
     story.addStep(new Statement() {
       @Override
@@ -144,15 +149,15 @@ public class CodeDeployStepTest extends Assert {
     });
   }
 
-  @Test
-  public void codeDeployFailsOnNoSuchEnvironment() throws Exception {
+  @Theory
+  public void codeDeployFailsOnNoSuchEnvironment(final String peVersion) throws Exception {
 
     mockCodeManagerService.stubFor(post(urlEqualTo("/code-manager/v1/deploys"))
         .withHeader("content-type", equalTo("application/json"))
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getAPIResponseBody("2016.4", "/code-manager/v1/deploys", "code_deploy_failed_no_such_env.json"))));
+            .withBody(TestUtils.getAPIResponseBody(peVersion, "/code-manager/v1/deploys", "code_deploy_failed_no_such_env.json"))));
 
     story.addStep(new Statement() {
       @Override
@@ -171,15 +176,15 @@ public class CodeDeployStepTest extends Assert {
     });
   }
 
-  @Test
-  public void codeDeployFailsOnExpiredToken() throws Exception {
+  @Theory
+  public void codeDeployFailsOnExpiredToken(final String peVersion) throws Exception {
 
     mockCodeManagerService.stubFor(post(urlEqualTo("/code-manager/v1/deploys"))
         .withHeader("content-type", equalTo("application/json"))
         .willReturn(aResponse()
             .withStatus(401)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getAPIResponseBody("2016.4", "/code-manager/v1/deploys", "expired_token.json"))));
+            .withBody(TestUtils.getAPIResponseBody(peVersion, "/code-manager/v1/deploys", "expired_token.json"))));
 
     story.addStep(new Statement() {
       @Override
