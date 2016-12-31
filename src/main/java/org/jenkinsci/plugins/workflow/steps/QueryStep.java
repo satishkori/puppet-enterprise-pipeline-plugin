@@ -67,7 +67,7 @@ public final class QueryStep extends PuppetEnterpriseStep implements Serializabl
 
     @Override protected ArrayList run() throws Exception {
       PQLQuery query = new PQLQuery();
-      ArrayList results = new ArrayList();
+      ArrayList results = null;
 
       query.setQuery(step.getQuery());
 
