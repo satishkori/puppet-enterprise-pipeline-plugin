@@ -9,6 +9,8 @@ import org.junit.ClassRule;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runners.model.Statement;
+import org.junit.experimental.theories.*;
+import org.junit.runner.RunWith;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -51,7 +53,10 @@ import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import org.jenkinsci.plugins.puppetenterprise.models.PuppetEnterpriseConfig;
 import org.jenkinsci.plugins.puppetenterprise.TestUtils;
 
+@RunWith(Theories.class)
 public class QueryStepTest extends Assert {
+
+  public static @DataPoints String[] PEVersions = {"2016.2","2016.4"};
 
   @ClassRule
   public static WireMockRule mockPuppetDBService = new WireMockRule(options()
@@ -86,16 +91,16 @@ public class QueryStepTest extends Assert {
     });
   }
 
-  private String getNodeQueryResponseString() {
-    return TestUtils.getAPIResponseBody("2016.4", "/pdb/query/v4", "node_results.json");
+  private String getNodeQueryResponseString(String peVersion) {
+    return TestUtils.getAPIResponseBody(peVersion, "/pdb/query/v4", "node_results.json");
   }
 
-  private String getBadQueryString() {
-    return TestUtils.getAPIResponseBody("2016.4", "/pdb/query/v4", "bad_query.json");
+  private String getBadQueryString(String peVersion) {
+    return TestUtils.getAPIResponseBody(peVersion, "/pdb/query/v4", "bad_query.json");
   }
 
-  @Test
-  public void queryPuppetDBNodesSuccessful() throws Exception {
+  @Theory
+  public void queryPuppetDBNodesSuccessful(final String peVersion) throws Exception {
 
     mockPuppetDBService.stubFor(post(urlEqualTo("/pdb/query/v4"))
         .withHeader("content-type", equalTo("application/json"))
@@ -103,20 +108,20 @@ public class QueryStepTest extends Assert {
         .willReturn(aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
-            .withBody(getNodeQueryResponseString())));
+            .withBody(getNodeQueryResponseString(peVersion))));
 
     story.addStep(new Statement() {
       @Override
       public void evaluate() throws Throwable {
 
         //Create a job where the credentials are defined separately
-        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Successful Query of All Nodes");
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Successful Query of All Nodes Against " + peVersion);
         job.setDefinition(new CpsFlowDefinition(
           "node { \n" +
           "  puppet.credentials 'pe-test-token'\n" +
           "  results = puppet.query 'nodes {}'\n" +
           "  println 'Root object is of type: ' + results.getClass()\n" +
-          "  println 'First object latest_report_corrective_change is of type: ' + results[0]['latest_report_corrective_change'].getClass()\n" +
+          "  println 'First object latest_report_noop is of type: ' + results[0]['latest_report_noop'].getClass()\n" +
           "  println 'First object facts_timestamp is of type: ' + results[0]['facts_timestamp'].getClass()\n" +
           "  println 'First certname is: ' + results[0].certname\n" +
           "}", true));
@@ -125,7 +130,7 @@ public class QueryStepTest extends Assert {
         story.j.assertLogContains("nodes {}", result);
         story.j.assertLogContains("Query returned 10 results.", result);
         story.j.assertLogContains("Root object is of type: class java.util.ArrayList", result);
-        story.j.assertLogContains("First object latest_report_corrective_change is of type: class java.lang.Boolean", result);
+        story.j.assertLogContains("First object latest_report_noop is of type: class java.lang.Boolean", result);
         //TODO: The timestamp should be a Date object in a future release with breaking changes
         story.j.assertLogContains("First object facts_timestamp is of type: class java.lang.String", result);
         story.j.assertLogContains("First certname is: gitlab.inf.puppet.vm", result);
@@ -174,8 +179,8 @@ public class QueryStepTest extends Assert {
     });
   }
 
-  @Test
-  public void malformedQueryFails() throws Exception {
+  @Theory
+  public void malformedQueryFails(final String peVersion) throws Exception {
 
     mockPuppetDBService.stubFor(post(urlEqualTo("/pdb/query/v4"))
         .withHeader("content-type", equalTo("application/json"))
@@ -183,14 +188,14 @@ public class QueryStepTest extends Assert {
         .willReturn(aResponse()
             .withStatus(400)
             .withHeader("Content-Type", "text/plain")
-            .withBody(getBadQueryString())));
+            .withBody(getBadQueryString(peVersion))));
 
     story.addStep(new Statement() {
       @Override
       public void evaluate() throws Throwable {
 
         //Create a job where the credentials are defined separately
-        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Failed Job With Malformed PQL Query");
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Failed Job With Malformed PQL Query Against " + peVersion);
         job.setDefinition(new CpsFlowDefinition(
           "node { \n" +
           "  puppet.credentials 'pe-test-token'\n" +
@@ -205,21 +210,21 @@ public class QueryStepTest extends Assert {
     });
   }
 
-  @Test
-  public void queryFailsOnExpiredToken() throws Exception {
+  @Theory
+  public void queryFailsOnExpiredToken(final String peVersion) throws Exception {
 
     mockPuppetDBService.stubFor(post(urlEqualTo("/pdb/query/v4"))
         .withHeader("content-type", equalTo("application/json"))
         .willReturn(aResponse()
             .withStatus(401)
             .withHeader("Content-Type", "application/json")
-            .withBody(TestUtils.getAPIResponseBody("2016.4", "pdb/query/v4", "expired_token.json"))));
+            .withBody(TestUtils.getAPIResponseBody(peVersion, "pdb/query/v4", "expired_token.json"))));
 
     story.addStep(new Statement() {
       @Override
       public void evaluate() throws Throwable {
 
-        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Query Fails on Expired Token");
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Query Fails on Expired Token Against " + peVersion);
         job.setDefinition(new CpsFlowDefinition(
           "node { \n" +
           "  puppet.query 'production', credentials: 'pe-test-token'\n" +
