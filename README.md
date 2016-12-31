@@ -219,7 +219,9 @@ The following parameters should be used with Puppet Enterprise 2016.4+ for defin
 
 # Compatibility
 
-This plugin is compatible with Puppet Enterprise 2016.2+
+This plugin is compatible with Puppet Enterprise 2016.2+ and Jenkins 1.642.3+
 
 Some step parameters are only available on newer versions of Puppet Enterprise.
 Those parameters are labeled as such.
+
+This plugin has not been tested with Jenkins Declarative Pipelines.
