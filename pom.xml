@@ -58,8 +58,8 @@
        <artifactId>findbugs-maven-plugin</artifactId>
        <version>3.0.1</version>
        <configuration>
-          <failOnError>true</failOnError>
-          <threshold>Medium</threshold>
+          <failOnError>false</failOnError>
+          <threshold>Max</threshold>
           <effort>Default</effort>
           <xmlOutput>true</xmlOutput>
           <skip>${skipFindBugs}</skip>
