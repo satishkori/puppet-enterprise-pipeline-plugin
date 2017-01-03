@@ -17,7 +17,7 @@ server.
 node {
     puppet.credentials 'pe-access-token'
     puppet.codeDeploy 'production'
-    puppet.job 'production', target: 'App[instance'], noop: true, concurrency: 10
+    puppet.job 'production', target: 'App[instance]', noop: true, concurrency: 10
 }
 ```
 
