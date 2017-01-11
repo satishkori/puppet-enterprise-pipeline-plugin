@@ -3,7 +3,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
 <j:new var="h" className="hudson.Functions" />
 
-  <l:layout norefresh="true" css="/plugin/puppet-enterprise-pipeline/css/hiera.css">
+  <l:layout norefresh="true" css="/plugin/puppet-enterprise-pipeline/css/hiera.css" permission="${it.VIEW}">
     <st:bind value="${it.deleteScope}" var="backend"/>
     <l:header>
     </l:header>
@@ -92,11 +92,13 @@
           <table>
             <tr>
               <td class="scope-name">${scope}</td>
+              <j:if test="${h.hasPermission(it.DELETE)}">
               <td class="scope-delete">
                 <button id="${scope}-remove-button" onclick="deleteScope('${scope}')" class="danger delete delete-scope">Remove Scope</button>
                 <button id="${scope}-confirm-button" onclick="confirmDeleteScope('${scope}')" class="danger delete delete-confirm">Confirm Delete</button>
                 <button id="${scope}-cancel-button" onclick="cancelDeleteScope('${scope}')" class="danger delete delete-cancel">Cancel</button>
               </td>
+              </j:if>
             </tr>
           </table>
 
@@ -122,9 +124,11 @@
                     ${it.getKeySource(scope, key)}
                   </td>
                   <td class="key-pair-delete">
+                    <j:if test="${h.hasPermission(it.DELETE)}">
                     <button id="${scope}-${key}-remove-button" onclick="deleteKey('${key}','${scope}')" class="delete delete-key">Remove</button>
                     <button id="${scope}-${key}-confirm-button" onclick="confirmDeleteKey('${key}','${scope}')" class="delete delete-confirm">Confirm Delete</button>
                     <button id="${scope}-${key}-cancel-button" onclick="cancelDeleteKey('${key}','${scope}')" class="delete delete-cancel">Cancel</button>
+                    </j:if>
                   </td>
                 </tr>
               </f:repeatable>
