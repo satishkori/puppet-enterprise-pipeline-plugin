@@ -120,7 +120,17 @@ public class HieraDataStore implements RootAction {
   }
 
   public void doLookup(StaplerRequest req, StaplerResponse rsp) throws IOException {
-    User.current().checkPermission(LOOKUP);
+    //If Anonymous request and anonymous requests do not have READ permission
+    if (User.current() == null && !User.get("Anonymous").hasPermission(LOOKUP)) {
+      rsp.setStatus(403);
+      return;
+    }
+
+    //If the session is authenticated but the user does not have LOOKUP permissions
+    if (User.current() != null && !User.current().hasPermission(LOOKUP)) {
+      rsp.setStatus(403);
+      return;
+    }
 
     net.sf.json.JSONObject form = null;
     Map parameters = null;
