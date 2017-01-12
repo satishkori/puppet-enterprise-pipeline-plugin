@@ -121,7 +121,7 @@ public class HieraDataStore implements RootAction {
 
   public void doLookup(StaplerRequest req, StaplerResponse rsp) throws IOException {
     //If Anonymous request and anonymous requests do not have READ permission
-    if (User.current() == null && !User.get("Anonymous").hasPermission(LOOKUP)) {
+    if (User.current() == null && !User.get("anonymous").hasPermission(LOOKUP)) {
       rsp.setStatus(403);
       return;
     }
