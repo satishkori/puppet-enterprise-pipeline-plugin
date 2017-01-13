@@ -47,29 +47,6 @@ Puppet environment. An example hiera.yaml configuration:
     - /hiera/lookup?path=%{environment}&key=%{key}
 ```
 
-#### Hiera HTTP authentication
-
-If Jenkins' Global Security is configured to allow unauthenticated read-only
-access, the 'use_auth', 'auth_pass', and 'auth_user' parameters are
-unnecessary.  Otherwise, create a local Jenkins user that has permissions to
-view the Hiera Data Lookup page and use that user's credentials for the
-hiera.yaml configuration.
-
-To set Hiera values from the Jenkins Pipeline script:
-
-```
-node {
-  puppet.hiera path: 'host.example.com', key: 'keyname', value: 'keyvalue'
-  puppet.hiera path: 'dc-location', key: 'keyname', value: 'keyvalue'
-  puppet.hiera path: 'production', key: 'keyname', value: 'keyvalue'
-}
-```
-
-This is experimental because the values are stored in an XML file on the
-Jenkins server.  There is no audit history of the data and therefor no way to
-replicate past values. Also, if the file is lost due to, for example, disk
-failure, the current values are lost.  So only use this if you trust your
-Jenkins server backups and don't care about audit history.
 
 ## Configuration
 
@@ -94,6 +71,41 @@ text**.  Set the **Secret** value to the token printed out by the first step.
 It is recommended to give the token an easy-to-identiy **ID** by clicking on
 the **Advanced** button. That will make it easier to identify which token is
 being used from the Jenkins Pipeline scripts.
+
+### Hiera
+
+#### Hiera HTTP authentication
+
+If Jenkins' Global Security is configured to allow unauthenticated read-only
+access, the 'use_auth', 'auth_pass', and 'auth_user' parameters in the
+hiera.yaml file are unnecessary. Otherwise, create a local Jenkins user that
+has Overall/Read permissions use that user's credentials for the hiera.yaml
+configuration.
+
+#### Hiera Data Store permissions
+
+If Jenkins' Global Security is configured to use matrix authorization, any user
+with the Hiera/View permission is allowed to view the Hiera Data Store page and
+any user with the Hiera/Delete permission can delete scopes and keys.  
+
+Note, these permissions have no effect on the ability to lookup specificy Hiera
+keys using the /hiera/lookup endpoint.
+
+To set Hiera values from the Jenkins Pipeline script:
+
+```
+node {
+  puppet.hiera path: 'host.example.com', key: 'keyname', value: 'keyvalue'
+  puppet.hiera path: 'dc-location', key: 'keyname', value: 'keyvalue'
+  puppet.hiera path: 'production', key: 'keyname', value: 'keyvalue'
+}
+```
+
+This is experimental because the values are stored in an XML file on the
+Jenkins server.  There is no audit history of the data and therefor no way to
+replicate past values. Also, if the file is lost due to, for example, disk
+failure, the current values are lost.  So only use this if you trust your
+Jenkins server backups and don't care about audit history.
 
 ## Pipeline Steps
 
