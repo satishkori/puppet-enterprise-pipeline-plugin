@@ -153,7 +153,7 @@ public class HieraDataStoreTest extends Assert {
   }
 
   @Test
-  public void lookupAuthenticatedRequestsWithLOOKUPPermissionSucceeds() throws Exception {
+  public void lookupAuthenticatedRequestsWithREADPermissionSucceeds() throws Exception {
 
     story.addStep(new Statement() {
       @Override
@@ -166,7 +166,6 @@ public class HieraDataStoreTest extends Assert {
 
         story.j.jenkins.setSecurityRealm(realm);
         story.j.jenkins.setAuthorizationStrategy(authorizationStrategy);
-        authorizationStrategy.add(HieraDataStore.LOOKUP, "casey");
         authorizationStrategy.add(Jenkins.READ, "casey");
         HieraConfig.setKeyValue("testscope", "testkey", "Lookup Authenticated Request With Hiera/Lookup Permission Succeeds", "testvalue");
 
@@ -177,7 +176,7 @@ public class HieraDataStoreTest extends Assert {
   }
 
   @Test
-  public void lookupAuthenticatedRequestsWithoutLOOKUPPermissionFails() throws Exception {
+  public void lookupAuthenticatedRequestsWithoutREADPermissionFails() throws Exception {
 
     story.addStep(new Statement() {
       @Override
@@ -190,7 +189,6 @@ public class HieraDataStoreTest extends Assert {
 
         story.j.jenkins.setSecurityRealm(realm);
         story.j.jenkins.setAuthorizationStrategy(authorizationStrategy);
-        authorizationStrategy.add(Jenkins.READ, "don");
         HieraConfig.setKeyValue("testscope", "testkey", "Lookup Authenticated Request Without Hiera/Lookup Permission Fails", "testvalue");
 
         exception.expect(HTTPUnauthorized.class);

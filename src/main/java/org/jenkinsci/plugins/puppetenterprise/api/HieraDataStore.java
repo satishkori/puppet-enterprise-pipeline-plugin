@@ -9,6 +9,8 @@ import hudson.model.RootAction;
 import hudson.model.User;
 import jenkins.model.Jenkins;
 import hudson.Extension;
+import hudson.Plugin;
+import hudson.model.Api;
 import com.google.gson.Gson;
 import javax.servlet.ServletException;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
@@ -34,9 +36,6 @@ public class HieraDataStore implements RootAction {
 
   public static final Permission VIEW = new Permission(GROUP, "View",
               Messages._HieraDataStore_ViewPermissionDescription(), Permission.READ, true, SCOPES);
-
-  public static final Permission LOOKUP = new Permission(GROUP, "Lookup",
-              Messages._HieraDataStore_LookupPermissionDescription(), Permission.READ, true, SCOPES);
 
   public HieraDataStore() {
     HieraConfig.loadGlobalConfig();
@@ -120,18 +119,6 @@ public class HieraDataStore implements RootAction {
   }
 
   public void doLookup(StaplerRequest req, StaplerResponse rsp) throws IOException {
-    //If Anonymous request and anonymous requests do not have LOOKUP permission
-    if (User.current() == null && !User.get("anonymous").hasPermission(LOOKUP)) {
-      rsp.setStatus(403);
-      return;
-    }
-
-    //If the session is authenticated but the user does not have LOOKUP permissions
-    if (User.current() != null && !User.current().hasPermission(LOOKUP)) {
-      rsp.setStatus(403);
-      return;
-    }
-
     net.sf.json.JSONObject form = null;
     Map parameters = null;
 
