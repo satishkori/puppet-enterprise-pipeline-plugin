@@ -2,19 +2,40 @@ package org.jenkinsci.plugins.puppetenterprise.api;
 
 import java.io.*;
 import java.util.*;
+import java.util.Locale;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import hudson.model.RootAction;
+import hudson.model.User;
+import jenkins.model.Jenkins;
 import hudson.Extension;
+import hudson.Plugin;
+import hudson.model.Api;
 import com.google.gson.Gson;
 import javax.servlet.ServletException;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
+import hudson.security.Permission;
+import hudson.security.PermissionGroup;
+import hudson.security.PermissionScope;
 
+import org.jenkinsci.plugins.puppetenterprise.Messages;
 import org.jenkinsci.plugins.puppetenterprise.models.HieraConfig;
 
 @Extension
 public class HieraDataStore implements RootAction {
   private static final String ICON_PATH = "/plugin/puppet-enterprise-pipeline/images/cfg_logo.png";
+
+  private static final PermissionScope[] SCOPES =
+          new PermissionScope[]{PermissionScope.ITEM, PermissionScope.ITEM_GROUP, PermissionScope.JENKINS};
+
+  public static final PermissionGroup GROUP = new PermissionGroup(HieraDataStore.class,
+              Messages._HieraDataStore_PermissionGroupTitle());
+
+  public static final Permission DELETE = new Permission(GROUP, "Delete",
+              Messages._HieraDataStore_DeletePermissionDescription(), Permission.DELETE, true, SCOPES);
+
+  public static final Permission VIEW = new Permission(GROUP, "View",
+              Messages._HieraDataStore_ViewPermissionDescription(), Permission.READ, true, SCOPES);
 
   public HieraDataStore() {
     HieraConfig.loadGlobalConfig();
@@ -72,11 +93,13 @@ public class HieraDataStore implements RootAction {
 
   @JavaScriptMethod
   public void deleteScope(String scope) {
+    User.current().checkPermission(DELETE);
     HieraConfig.deleteScope(scope);
   }
 
   @JavaScriptMethod
   public void deleteKey(String key, String scope) {
+    User.current().checkPermission(DELETE);
     HieraConfig.deleteKey(key, scope);
   }
 
