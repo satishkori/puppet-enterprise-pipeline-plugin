@@ -1,3 +1,14 @@
+## 1.3.0
+
+- Introduce a permission system for the Hiera Data Store page. Now if Jenkins
+  is using a matrix authorization system, Jenkins users will require Hiera/View
+  or Hiera/Delete permissions to view the Hiera Data Store page or delete
+  key/value pairs. Jenkins users will also require Overall/Read permission to
+  lookup key/value pairs through the API. This means a Jenkins user with only
+  Overall/Read permissions can be used for Hiera on the Puppet server to lookup
+  Hiera values from Jenkins.
+- Fix JENKINS-40812 with the new permissions
+
 ## 1.2.3
 - Significantly improved error reporting throughout all plugin features
 - Improved reporting for puppet.codeDeploy and puppet.job steps
