@@ -45,9 +45,14 @@ public final class PuppetEnterpriseConfig implements Serializable {
 
   public static void setPuppetMasterUrl(String url) throws IOException, java.net.UnknownHostException,
     java.security.NoSuchAlgorithmException, java.security.KeyStoreException, java.security.KeyManagementException, org.apache.http.conn.HttpHostConnectException  {
+    setPuppetMasterUrl(url, true);
+  }
+
+  public static void setPuppetMasterUrl(String url, Boolean retrieveCACertificate) throws IOException, java.net.UnknownHostException,
+    java.security.NoSuchAlgorithmException, java.security.KeyStoreException, java.security.KeyManagementException, org.apache.http.conn.HttpHostConnectException  {
     puppetMasterUrl = url;
 
-    if(puppetMasterCACertificate == null || puppetMasterCACertificate.isEmpty()) {
+    if (retrieveCACertificate) {
       puppetMasterCACertificate = retrievePuppetMasterCACertificate();
     }
 
