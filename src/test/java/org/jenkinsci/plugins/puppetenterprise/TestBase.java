@@ -32,7 +32,9 @@ import org.jenkinsci.plugins.puppetenterprise.TestUtils;
 
 @RunWith(Suite.class)
 @SuiteClasses({PuppetJobStepTest.class, CodeDeployStepTest.class,
-  HieraStepTest.class, QueryStepTest.class, HieraDataStoreTest.class})
+  HieraStepTest.class, QueryStepTest.class, HieraDataStoreTest.class,
+  PuppetEnterpriseManagementTest.class
+})
 public class TestBase {
 
   private static WireMockServer mockPuppetServer;
