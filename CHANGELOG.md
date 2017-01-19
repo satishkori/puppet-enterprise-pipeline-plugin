@@ -1,3 +1,8 @@
+## 1.3.1
+
+- Bug fix where updating the Puppet server's address would not update the CA
+  certificate, causing SSL errors.
+
 ## 1.3.0
 
 - Introduce a permission system for the Hiera Data Store page. Now if Jenkins
