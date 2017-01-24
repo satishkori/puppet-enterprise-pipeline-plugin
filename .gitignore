@@ -1,3 +1,5 @@
 work
 target
 .DS_Store
+.classpath
+effective.pom
